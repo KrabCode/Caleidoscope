@@ -1,3 +1,5 @@
+package Drawables.Bands;
+
 import processing.core.PApplet;
 
 public class SlitheringRaycasterBand extends Band{
@@ -7,10 +9,9 @@ public class SlitheringRaycasterBand extends Band{
     }
 
 
-
     @Override
     protected float genRforce() {
-        return p.cos(rot/20)/500;
+        return p.cos(rot)/100;
     }
 
 }

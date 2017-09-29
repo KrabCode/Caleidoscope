@@ -1,3 +1,5 @@
+package Drawables.Bands;
+
 import processing.core.PApplet;
 
 public class SuicideBand extends Band {
@@ -11,13 +13,6 @@ public class SuicideBand extends Band {
     int maxCenterPasses = 3;
     boolean oldHeading = true;
 
-    @Override
-    public void draw() {
-
-
-        super.draw();
-
-    }
 
     @Override
     protected float genSize() {
@@ -43,7 +38,6 @@ public class SuicideBand extends Band {
         {
             oldHeading = newHeading;
             timesDirectionChanged++;
-            p.println(timesDirectionChanged);
         }
 
         return newForce;

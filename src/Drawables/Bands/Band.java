@@ -1,66 +1,56 @@
+package Drawables.Bands;
+
+import Drawables.Drawable;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class Band{
+public class Band extends Drawable {
     PApplet p;
 
-    public Band(PApplet window){
+    public Band(PApplet window) {
         this.p = window;
     }
 
-    PImage img;
-    float loc, spd, acc;
-    float rot, rSpd, rAcc;
-    float size, sizeMod;
-    int imgCount;
-    Point coords;
+    public PImage img;
+    public float loc, spd, acc;
+    public float rot, rSpd, rAcc;
+    public float size, sizeMod;
+    public int imgCount;
+    public Point coords;
 
-    public void update(){
-
-        applyForce(genForce(), genRforce());
-
-        spd += acc;
-        rSpd += rAcc;
-        loc += spd;
-        rot += rSpd;
-
-        acc = 0;
-        rAcc = 0;
-    }
-
-    public void draw() {
+    public void draw(float[] spectrum) {
+        update(spectrum);
         float angleStep = 360 / imgCount;
-        for(int i = 0; i <= imgCount; i++){
+        for (int i = 0; i < imgCount; i++) {
             coords = getPointAtAngle(
-                    new Point(p.width/2, p.height/2),
+                    new Point(p.width / 2, p.height / 2),
                     loc,
                     rot + angleStep * i
             );
             size = genSize();
             p.pushMatrix();
-                p.translate(coords.x,coords.y);
-                p.rotate(toRad(
-                        -90 + getAngle(
-                                new Point(coords.x, coords.y),
-                                new Point(p.width/2, p.height/2)
-                        )));
-                applyVisualEffects();
-                p.image(img, -size/2,-size/2, size, size);
+            p.translate(coords.x, coords.y);
+            p.rotate(toRad(
+                    -90 + getAngle(
+                            new Point(coords.x, coords.y),
+                            new Point(p.width / 2, p.height / 2)
+                    )));
+            p.image(img, -size / 2, -size / 2, size, size);
             p.popMatrix();
         }
     }
 
-    protected float genSize(){
-       return sizeMod*spd;
+    public void applyForce(float acc, float rAcc) {
+        this.acc += acc;
+        this.rAcc += rAcc;
     }
 
-    protected void applyVisualEffects(){
-
+    protected void genAudioReaction(float mag){
+        //applyForce(mag/500, mag/1000);
     }
 
-    public void applyForce(float acc, float rAcc){
-        this.acc += acc ;
-        this.rAcc += rAcc ;
+    protected float genSize() {
+        return sizeMod * spd;
     }
 
     protected float genForce() {
@@ -71,6 +61,27 @@ public class Band{
         return 0;
     }
 
+    private void update(float[] spectrum) {
+
+        applyForce(genForce(), genRforce());
+
+        //get lower third avg
+        float total = 0;
+        for(int i = 0; i < spectrum.length/3; i++){
+            total+= spectrum[i];
+        }
+        total /= spectrum.length/3;
+
+        genAudioReaction(total);
+        spd += acc;
+        rSpd += rAcc;
+        loc += spd;
+        rot += rSpd;
+
+        acc = 0;
+        rAcc = 0;
+    }
+
     /**
      * Convert me like one of your french girls.
      *
@@ -78,7 +89,7 @@ public class Band{
      * @return
      */
     private float toRad(float degrees){
-        return (float)Math.toRadians(degrees);
+        return (float) java.lang.Math.toRadians(degrees);
     }
     /**
      * Finds a point in a given angle and distance from a center point.

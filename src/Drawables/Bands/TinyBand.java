@@ -1,3 +1,5 @@
+package Drawables.Bands;
+
 import processing.core.PApplet;
 
 public class TinyBand extends Band {
@@ -7,11 +9,10 @@ public class TinyBand extends Band {
 
     @Override
     protected float genRforce() {
-        return 0.000001f;
-    }
-
-    @Override
-    protected float genSize() {
-        return spd;
+        if(rSpd > 0){
+            return 0.0001f;
+        }else{
+            return-0.0001f;
+        }
     }
 }

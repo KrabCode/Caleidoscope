@@ -1,41 +1,55 @@
+import Drawables.Drawable;
+import Factories.DrawableFactory;
+import Factories.ScatterplotWaveformFactory;
+import beads.*;
+import org.joda.time.DateTime;
 import processing.core.PApplet;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import processing.sound.*;
+import processing.core.PImage;
+
 
 import com.hamoid.VideoExport;
 
 public class MainApp extends PApplet{
 
-//    concentric circles growing outward made out of various icons / gifs even? one icon type per circle
-//    background generated from icon for good contrast?
-
-    boolean first = true;
-    int spawnrate = 30;
-    int bgColor = 00;
-    int bgAlpha = 15;
-
-    BandFactory bf;
-    List<Band> bandsOnScreen;
 
 
-    //////////////
-    // ON AIR   //
-    //////////////
+    private int bgColor = 00;
+    private int bgAlpha = 15;
 
-    boolean rec = true;
-    String ostSourcePath = "";//D:\Music\The Black Angels\Passover\05 Black Grease.mp3
-    boolean playSong = false;
-    SoundFile soundFile;
+    private List<DrawableFactory> drawableFactories;
+    private List<Drawable> drawablesShown;
+    private List<PImage> imageStore;
+    private String imageDirectory = "C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
-    boolean fadeout = false;
-    VideoExport vid;
-    float fadeMag = 0;
-    float fadeSpd = 3f;
-    float fadeMin = 0;
+    //////////////////////////////
+    private boolean rec = false;//
+    private boolean playSong = true;
+    private boolean visualiser = true;
+    // ON AIR  (cpu expensive)  //
+    //////////////////////////////
+
+    private AudioContext ac;
+    private PowerSpectrum ps;
+
+    private VideoExport vid;
+    private boolean fadeout = false;
+    private float fadeMag = 0;
+    private float fadeSpd = 3f;
+    private float fadeMin = 0;
+
+    private boolean flagA = true;
+    private boolean flagB = true;
+    private boolean flagC = true;
+
+    private long animationStarted;
+
+    private String ostFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
+
 
     public static void main(String[] args)
     {
@@ -50,53 +64,56 @@ public class MainApp extends PApplet{
 
     public void settings()
     {
-        fullScreen();
-        //size(1200,800);
+        //fullScreen();
+        size(1200,800);
         smooth(8);
     }
 
     public void setup(){
-        bandsOnScreen = new ArrayList<Band>();
-        bf = new BandFactory(this);
+        drawablesShown = new ArrayList<Drawable>();
+        drawableFactories = new ArrayList<DrawableFactory>();
 
+        imageStore = loadImagesFromDisk(imageDirectory);
+
+        //draw background
         noStroke();
         fill(bgColor);
         rect(0,0,width,height);
 
+        //record the show, start the music
         if(rec){
             vid = new VideoExport(this);
-            if(ostSourcePath!=""){
-                vid.setAudioFileName(ostSourcePath);
-                if(playSong){
-
-                }
-            }
+            vid.setAudioFileName(ostFilepath);
             vid.startMovie();
         }
+
+        setupAudio(new File(ostFilepath));
+        ac = new AudioContext();
+
+        animationStarted = DateTime.now().getMillis();
     }
 
-    int spawnedAlready = 0;
-    boolean pause = false;
+    private boolean pause = false;
     public void draw() {
+
 //        paintCrosshairs();
         if(!pause){
             //background
             noStroke();
             fill(bgColor, bgAlpha);
             rect(0, 0, width, height);
-            //spawn new bands
-            if (first || (frameCount % spawnrate == 0)) {
-                bandsOnScreen.add(bf.getNewBand(spawnedAlready++));
-                first = false;
-            }
+
+            tryAddNewFactories();
+            float[] spectrum = ps.getFeatures();
             //draw bands
-            for (Band b : bandsOnScreen) {
-                b.update();
-                b.draw();
+            for (Drawable b : drawablesShown) {
+                b.draw(spectrum);
             }
 
-
-            removeAllOffscreenBands();
+            //re-analyze bands in audio, proc the factories
+            for (DrawableFactory f : drawableFactories){
+                drawablesShown = f.update(drawablesShown,spectrum);
+            }
 
             if (fadeout) {
                 if (fadeMag < 255 - fadeMin) {
@@ -107,7 +124,7 @@ public class MainApp extends PApplet{
             }
             if (rec) {
                 vid.saveFrame();
-                println("elapsed: " + vid.getCurrentTime());
+               //println("video time: " + vid.getCurrentTime());
             }
         }
 
@@ -125,25 +142,78 @@ public class MainApp extends PApplet{
         }else{
             pause = false;
         }
+        println("datetime ms: " + getSecondsElapsed());
     }
 
-    void removeAllOffscreenBands(){
-        List<Band> toRemove = new ArrayList<Band>();
-        for(Band l : bandsOnScreen){
-            if(l.loc > width + height){
-                toRemove.add(l);
+
+
+    private ArrayList<PImage> loadImagesFromDisk(String imgSourceDir){
+        ArrayList<PImage> images = new ArrayList<PImage>();
+        List<String> imgFilenames = getFilenamesInDirectory(imgSourceDir);
+        for(String s : imgFilenames){
+            images.add(loadImage(imgSourceDir + "\\" + s));
+        }
+        println("-----------------");
+        println("imgs loaded:" + images.size());
+        return images;
+    }
+
+    private ArrayList<String> getFilenamesInDirectory(String dir){
+        ArrayList<String> filenames = new ArrayList<String>();
+        File folder = new File(dir);
+        File[] listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                System.out.println("File " + listOfFiles[i].getName());
+                filenames.add(listOfFiles[i].getName());
+            } else if (listOfFiles[i].isDirectory()) {
+                System.out.println("Directory " + listOfFiles[i].getName());
             }
         }
-        bandsOnScreen.removeAll(toRemove);
+        return filenames;
     }
 
 
+    private void tryAddNewFactories(){
+        if(flagA){
+            //drawableFactories.add(new BandFactory(this, 0, 50, imageStore));
+            flagA = false;
+        }
+        if(flagB && getSecondsElapsed() > 1){
+            //drawableFactories.add(new BandFactory(this, 1, 50, imageStore));
+            flagB = false;
+        }
+        if(flagC && getSecondsElapsed() > -1){
+            drawableFactories.add(new ScatterplotWaveformFactory(this));
+            flagC = false;
+        }
+    }
 
+    private long getSecondsElapsed(){
+        return DateTime.now().minus(animationStarted).getMillis()/1000;
+    }
 
-
-
-
-
-
+/*
+ * This code is used by the selectInput() method to get the filepath.
+ */
+    private void setupAudio(File selection) {
+        //play song
+        if(selection != null){
+            String audioFileName = selection.getAbsolutePath();
+            SamplePlayer player = new SamplePlayer(ac, SampleManager.sample(audioFileName));
+            Gain g = new Gain(ac, 2, 0.2f);
+            g.addInput(player);
+            ac.out.addInput(g);
+        }
+        //setup fft
+        ShortFrameSegmenter sfs = new ShortFrameSegmenter(ac);
+        sfs.addInput(ac.out);
+        FFT fft = new FFT();
+        ps = new PowerSpectrum();
+        sfs.addListener(fft);
+        fft.addListener(ps);
+        ac.out.addDependent(sfs);
+        ac.start();
+    }
 
 }
