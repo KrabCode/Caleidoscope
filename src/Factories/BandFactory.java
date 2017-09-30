@@ -2,6 +2,7 @@ package Factories;
 
 import Drawables.*;
 import Drawables.Bands.*;
+import Sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -31,7 +32,7 @@ public class BandFactory extends DrawableFactory {
     }
 
 
-    public List<Drawable> update(List<Drawable> drawables, float[] spectrum){
+    public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa){
         if(p.frameCount % spawnrate == 0)
         {
             Band newBand = getNewBand();

@@ -1,6 +1,7 @@
 package Drawables.Bands;
 
 import Drawables.Drawable;
+import Sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -18,8 +19,8 @@ public class Band extends Drawable {
     public int imgCount;
     public Point coords;
 
-    public void draw(float[] spectrum) {
-        update(spectrum);
+    public void draw(SoundAnalysis sa) {
+        update(sa.spectrum);
         float angleStep = 360 / imgCount;
         for (int i = 0; i < imgCount; i++) {
             coords = getPointAtAngle(
@@ -81,7 +82,6 @@ public class Band extends Drawable {
         acc = 0;
         rAcc = 0;
     }
-
     /**
      * Convert me like one of your french girls.
      *
@@ -91,6 +91,7 @@ public class Band extends Drawable {
     private float toRad(float degrees){
         return (float) java.lang.Math.toRadians(degrees);
     }
+
     /**
      * Finds a point in a given angle and distance from a center point.
      *
@@ -121,5 +122,6 @@ public class Band extends Drawable {
             this.y = y;
         }
     }
+
 }
 

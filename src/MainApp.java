@@ -1,7 +1,8 @@
 import Drawables.Drawable;
 import Factories.DrawableFactory;
-import Factories.ScatterplotWaveformFactory;
-import beads.*;
+import Factories.WaveFactory;
+import Sound.SoundAnalysis;
+import Sound.SoundManager;
 import org.joda.time.DateTime;
 import processing.core.PApplet;
 
@@ -24,17 +25,14 @@ public class MainApp extends PApplet{
     private List<DrawableFactory> drawableFactories;
     private List<Drawable> drawablesShown;
     private List<PImage> imageStore;
-    private String imageDirectory = "C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
+    private String imageDirectory = "";//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     //////////////////////////////
-    private boolean rec = false;//
-    private boolean playSong = true;
-    private boolean visualiser = true;
-    // ON AIR  (cpu expensive)  //
+       boolean rec = false ;     //
+//         ON AIR                   //
     //////////////////////////////
 
-    private AudioContext ac;
-    private PowerSpectrum ps;
+    private boolean pause = false;
 
     private VideoExport vid;
     private boolean fadeout = false;
@@ -42,13 +40,18 @@ public class MainApp extends PApplet{
     private float fadeSpd = 3f;
     private float fadeMin = 0;
 
+    private SoundManager sm;
+    //private String ostFilepath = "C:\\Users\\Jakub\\Downloads\\True Detective - Intro  Opening Song - Theme (The Handsome Family - Far From Any Road) + LYRICS.mp3";
+    private String ostFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
+
     private boolean flagA = true;
     private boolean flagB = true;
     private boolean flagC = true;
 
-    private long animationStarted;
+    private long animationStartedEpochMs;
 
-    private String ostFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
+    private boolean playSong = true;
+
 
 
     public static void main(String[] args)
@@ -64,16 +67,19 @@ public class MainApp extends PApplet{
 
     public void settings()
     {
-        //fullScreen();
-        size(1200,800);
+//        fullScreen();
+        size(600,600);
         smooth(8);
     }
 
     public void setup(){
         drawablesShown = new ArrayList<Drawable>();
         drawableFactories = new ArrayList<DrawableFactory>();
+        sm = new SoundManager(ostFilepath, playSong, 0.2f);
 
-        imageStore = loadImagesFromDisk(imageDirectory);
+        if(imageDirectory!=null&&!imageDirectory.equals("")){
+            imageStore = loadImagesFromDisk(imageDirectory);
+        }
 
         //draw background
         noStroke();
@@ -83,36 +89,56 @@ public class MainApp extends PApplet{
         //record the show, start the music
         if(rec){
             vid = new VideoExport(this);
-            vid.setAudioFileName(ostFilepath);
+            if(playSong){
+                vid.setAudioFileName(ostFilepath);
+            }
             vid.startMovie();
         }
 
-        setupAudio(new File(ostFilepath));
-        ac = new AudioContext();
-
-        animationStarted = DateTime.now().getMillis();
+        //the show has started, remember the time
+        animationStartedEpochMs = DateTime.now().getMillis();
     }
 
-    private boolean pause = false;
-    public void draw() {
+    private void tryAddNewFactories(){
+        if(flagA){
+            drawableFactories.add(new WaveFactory(this));
+            flagA = false;
+        }
+        if(flagB && getSecondsElapsed() > 1){
+            //drawableFactories.add(new BandFactory(this, 1, 50, imageStore));
+            flagB = false;
+        }
+        if(flagC && getSecondsElapsed() > -1){
+            //drawableFactories.add(new BandFactory(this, 0, 50, imageStore));
+            flagC = false;
+        }
+    }
 
+
+    public void draw() {
 //        paintCrosshairs();
+        checkInput();
         if(!pause){
-            //background
+            SoundAnalysis sa = sm.getFreshAnalysis();
+
+            if(sa.peak){
+                fill(3,0,0, bgAlpha);
+            }else{
+                fill(bgColor, bgAlpha);
+            }
+            //draw background
             noStroke();
-            fill(bgColor, bgAlpha);
             rect(0, 0, width, height);
 
-            tryAddNewFactories();
-            float[] spectrum = ps.getFeatures();
             //draw bands
             for (Drawable b : drawablesShown) {
-                b.draw(spectrum);
+                b.draw(sa);
             }
 
-            //re-analyze bands in audio, proc the factories
+            //proc the factories
+            tryAddNewFactories();
             for (DrawableFactory f : drawableFactories){
-                drawablesShown = f.update(drawablesShown,spectrum);
+                drawablesShown = f.update(drawablesShown,sa);
             }
 
             if (fadeout) {
@@ -122,12 +148,17 @@ public class MainApp extends PApplet{
                     tint(fadeMin);
                 }
             }
+
             if (rec) {
                 vid.saveFrame();
                //println("video time: " + vid.getCurrentTime());
             }
         }
 
+        bgColor = 0;
+    }
+
+    private void checkInput(){
         if(keyPressed){
             if(key=='w' && rec) {
                 vid.endMovie();
@@ -142,10 +173,7 @@ public class MainApp extends PApplet{
         }else{
             pause = false;
         }
-        println("datetime ms: " + getSecondsElapsed());
     }
-
-
 
     private ArrayList<PImage> loadImagesFromDisk(String imgSourceDir){
         ArrayList<PImage> images = new ArrayList<PImage>();
@@ -173,47 +201,7 @@ public class MainApp extends PApplet{
         return filenames;
     }
 
-
-    private void tryAddNewFactories(){
-        if(flagA){
-            //drawableFactories.add(new BandFactory(this, 0, 50, imageStore));
-            flagA = false;
-        }
-        if(flagB && getSecondsElapsed() > 1){
-            //drawableFactories.add(new BandFactory(this, 1, 50, imageStore));
-            flagB = false;
-        }
-        if(flagC && getSecondsElapsed() > -1){
-            drawableFactories.add(new ScatterplotWaveformFactory(this));
-            flagC = false;
-        }
+    private int getSecondsElapsed(){
+        return  (int) (DateTime.now().minus(animationStartedEpochMs).getMillis()/1000);
     }
-
-    private long getSecondsElapsed(){
-        return DateTime.now().minus(animationStarted).getMillis()/1000;
-    }
-
-/*
- * This code is used by the selectInput() method to get the filepath.
- */
-    private void setupAudio(File selection) {
-        //play song
-        if(selection != null){
-            String audioFileName = selection.getAbsolutePath();
-            SamplePlayer player = new SamplePlayer(ac, SampleManager.sample(audioFileName));
-            Gain g = new Gain(ac, 2, 0.2f);
-            g.addInput(player);
-            ac.out.addInput(g);
-        }
-        //setup fft
-        ShortFrameSegmenter sfs = new ShortFrameSegmenter(ac);
-        sfs.addInput(ac.out);
-        FFT fft = new FFT();
-        ps = new PowerSpectrum();
-        sfs.addListener(fft);
-        fft.addListener(ps);
-        ac.out.addDependent(sfs);
-        ac.start();
-    }
-
 }
