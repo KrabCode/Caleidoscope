@@ -25,12 +25,13 @@ public class WaveManager extends Manager {
     @Override
     public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa) {
 
-        if(/*p.frameCount % spawnrate == 0 ||*/ p.frameCount == 1)
+//        //ON START
+        if(p.frameCount == 1)
         {
 
-            Wave low = new LowWave(p, 50, 5);
-            Wave all = new MidWave(p, 200, 40);
-            Wave high = new HighWave(p, 400, 160);
+            Wave low = new LowWave(p, 50, 1);
+            Wave all = new MidWave(p, 150, 40);
+            Wave high = new HighWave(p, 250, 160);
 
             wavesFromThisFactory.add(low);
             wavesFromThisFactory.add(all);
@@ -39,16 +40,35 @@ public class WaveManager extends Manager {
             drawables.add(low);
             drawables.add(all);
             drawables.add(high);
+    }
 
-//             Samey concentric waves:
+
+
+//          Samey concentric waves:
 
 //            for(int j = 0; j < 4; j++){
 //                Wave w = new Wave(p, 50+(i++)*100);
 //                wavesFromThisFactory.add(w);
 //                drawables.add(w);
 //            }
+        return drawables;
+    }
 
+
+    public List<Drawable> createNewWave(List<Drawable> drawables){
+
+        Wave newWave = null;
+        switch (i++) {
+            case 0: newWave = new LowWave(p, 50, 5);   break;
+            case 1: newWave = new MidWave(p, 200, 40); break;
+            case 2: newWave = new HighWave(p, 400, 160); break;
+        }
+
+        if(newWave != null){
+            wavesFromThisFactory.add(newWave);
+            drawables.add(newWave);
         }
         return drawables;
     }
+
 }

@@ -14,26 +14,28 @@ public class Wave extends Drawable {
     Point center;
     PApplet p;
 
+    boolean odd = true;
+
     public Wave(PApplet p, float r, float deviation){
         this.p = p;
         this.r = r;
         this.baseR = r;
         this.deviation = deviation;
+
         spd = 0f;
-        alpha = 80;
+        alpha = 30;
 
-        strokeWeight = 2;
-
+        strokeWeight = 1;
         strokeR = 255;
         strokeG = 0;
         strokeB = 0;
 
-        strokePeakWeight = 3;
+        strokePeakWeight = 2;
         strokePeakR = 255;
         strokePeakG = 255;
         strokePeakB = 255;
 
-        spokes = 20;
+        spokes = 128;
 
         angleOffset = 0;
 
@@ -62,11 +64,31 @@ public class Wave extends Drawable {
         for(int i = 0; i < spokes + 1 ; i++){
             float angle = i*oneStep + angleOffset;
             Point target;
+
+            //SPOKES OF A WHEEL
             if(i%2==0){
                 target = Angle.getPointAtAngle(center, r + avg*deviation, angle );
             }else{
                 target = Angle.getPointAtAngle(center, r - avg*deviation, angle );
             }
+
+
+            //VIBRATING STRINGS
+//            if(odd){
+//                if(i%2==0){
+//                    target = Angle.getPointAtAngle(center, r + avg*deviation, angle );
+//                }else{
+//                    target = Angle.getPointAtAngle(center, r - avg*deviation, angle );
+//                }
+//            }else{
+//                if(i%2!=0){ //only difference
+//                    target = Angle.getPointAtAngle(center, r + avg*deviation, angle );
+//                }else{
+//                    target = Angle.getPointAtAngle(center, r - avg*deviation, angle );
+//                }
+//            }
+
+            odd = !odd;
 
             if(lastTarget != null) // the reason for the "+1" in the loop count - the first loop doesn't get drawn
             {

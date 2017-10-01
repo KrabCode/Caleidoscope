@@ -1,8 +1,8 @@
 package Math;
 
-public class Point {
-    public float x;
-    public float y;
+public final class Point {
+    public final float x;
+    public final float y;
 
     public Point(float x, float y) {
         this.x = x;
