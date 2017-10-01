@@ -1,15 +1,19 @@
 package Drawables.Bands;
 
-import Drawables.Drawable;
+import Drawables.Abstract.Drawable;
 import Sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import Math.*;
+
+import static Math.Angle.getAngle;
+
 public class Band extends Drawable {
     PApplet p;
 
-    public Band(PApplet window) {
-        this.p = window;
+    public Band(PApplet p) {
+        this.p = p;
     }
 
     public PImage img;
@@ -20,23 +24,23 @@ public class Band extends Drawable {
     public Point coords;
 
     public void draw(SoundAnalysis sa) {
-        update(sa.spectrum);
+        update(sa.getSpectrum());
         float angleStep = 360 / imgCount;
         for (int i = 0; i < imgCount; i++) {
-            coords = getPointAtAngle(
+            coords = Angle.getPointAtAngle(
                     new Point(p.width / 2, p.height / 2),
                     loc,
                     rot + angleStep * i
             );
             size = genSize();
             p.pushMatrix();
-            p.translate(coords.x, coords.y);
-            p.rotate(toRad(
-                    -90 + getAngle(
-                            new Point(coords.x, coords.y),
-                            new Point(p.width / 2, p.height / 2)
-                    )));
-            p.image(img, -size / 2, -size / 2, size, size);
+                p.translate(coords.x, coords.y);
+                p.rotate(Angle.toRad(
+                        -90 + getAngle(
+                                new Point(coords.x, coords.y),
+                                new Point(p.width / 2, p.height / 2)
+                        )));
+                p.image(img, -size / 2, -size / 2, size, size);
             p.popMatrix();
         }
     }
@@ -82,46 +86,5 @@ public class Band extends Drawable {
         acc = 0;
         rAcc = 0;
     }
-    /**
-     * Convert me like one of your french girls.
-     *
-     * @param degrees
-     * @return
-     */
-    private float toRad(float degrees){
-        return (float) java.lang.Math.toRadians(degrees);
-    }
-
-    /**
-     * Finds a point in a given angle and distance from a center point.
-     *
-     * @param center center point * @param radius given distance
-     * @param angle  given angle * @return
-     */
-    private Point getPointAtAngle(Point center, float radius, float angle) {
-        return new Point(center.x + radius * p.cos(angle * p.PI / 180), center.y + radius * p.sin(angle * p.PI / 180));
-    }
-
-    /**
-     * Returns angle of a line vs the horizont *
-     *
-     * @param origin start of the line
-     * @param end    end of the line 🚆
-     * @return horizontal line returns 0, vertical line returns -90 or 90
-     */
-    private float getAngle(Point origin, Point end) {
-        return p.degrees(p.atan2(end.y - origin.y, end.x - origin.x));
-    }
-
-    private class Point {
-        public float x;
-        public float y;
-
-        public Point(float x, float y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
 }
 

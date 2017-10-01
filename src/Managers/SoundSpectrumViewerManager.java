@@ -1,16 +1,20 @@
-package Factories;
+package Managers;
 
-import Drawables.Drawable;
-import Drawables.SoundSpectrumSimple;
+import Drawables.Abstract.Drawable;
+import Drawables.SoundSpectrumViewer;
+import Managers.Abstract.Manager;
 import Sound.SoundAnalysis;
 import processing.core.PApplet;
 
 import java.util.List;
+import Math.Rectangle;
 
-public class SoundSpectrumSimpleFactory extends DrawableFactory {
+public class SoundSpectrumViewerManager extends Manager {
 
     PApplet p;
-    public SoundSpectrumSimpleFactory(PApplet p){
+    Rectangle rect;
+
+    public SoundSpectrumViewerManager(PApplet p, Rectangle rect){
         this.p = p;
     }
 
@@ -20,7 +24,7 @@ public class SoundSpectrumSimpleFactory extends DrawableFactory {
     public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa) {
         //only make 1
         if(scatterplotWaveform == null){
-            scatterplotWaveform = new SoundSpectrumSimple(p);
+            scatterplotWaveform = new SoundSpectrumViewer(p, rect);
             drawables.add(scatterplotWaveform);
         }
         return drawables;

@@ -1,6 +1,6 @@
-import Drawables.Drawable;
-import Factories.DrawableFactory;
-import Factories.WaveFactory;
+import Drawables.Abstract.Drawable;
+import Managers.Abstract.Manager;
+import Managers.WaveManager;
 import Sound.SoundAnalysis;
 import Sound.SoundManager;
 import org.joda.time.DateTime;
@@ -9,12 +9,15 @@ import processing.core.PApplet;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import processing.core.PImage;
-
-
 import com.hamoid.VideoExport;
 
+/**
+ * The main class.
+ *
+ * See https://processing.org/tutorials/eclipse/ for why I'm extending PApplet
+ * and what the flip is going on with passing PApplet references in constructors
+ */
 public class MainApp extends PApplet{
 
 
@@ -22,14 +25,15 @@ public class MainApp extends PApplet{
     private int bgColor = 00;
     private int bgAlpha = 15;
 
-    private List<DrawableFactory> drawableFactories;
+    private List<Manager> drawableFactories;
     private List<Drawable> drawablesShown;
     private List<PImage> imageStore;
     private String imageDirectory = "";//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
-    //////////////////////////////
-       boolean rec = false ;     //
-//         ON AIR                   //
+
+    //////////////////////////////   ON AIR
+    private boolean rec             = false;
+    private boolean playSong        = true;
     //////////////////////////////
 
     private boolean pause = false;
@@ -41,16 +45,17 @@ public class MainApp extends PApplet{
     private float fadeMin = 0;
 
     private SoundManager sm;
-    //private String ostFilepath = "C:\\Users\\Jakub\\Downloads\\True Detective - Intro  Opening Song - Theme (The Handsome Family - Far From Any Road) + LYRICS.mp3";
-    private String ostFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
+    //TODO private String ostFolderpath = "";
+//    private String ostFilepath = "D:\\Torrents\\Exuma\\Reincarnation\\06 Exuma - Pay Me What You Owe Me.mp3";
+      private String ostFilepath = "C:\\Users\\Jakub\\Downloads\\True Detective - Intro  Opening Song - Theme (The Handsome Family - Far From Any Road) + LYRICS.mp3";
+    //  private String ostFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
 
     private boolean flagA = true;
     private boolean flagB = true;
     private boolean flagC = true;
 
-    private long animationStartedEpochMs;
+    private static long animationStartedEpochMs = 0;
 
-    private boolean playSong = true;
 
 
 
@@ -65,16 +70,23 @@ public class MainApp extends PApplet{
         line(width/2, 0, width / 2, height);
     }
 
+    /**
+     * Required for the same reason as
+     */
     public void settings()
     {
-//        fullScreen();
-        size(600,600);
-        smooth(8);
+        fullScreen();
+//        size(600,600);
+        //smooth(8);
     }
 
+    /**
+     * Happens once at the start
+     */
     public void setup(){
+        //instantiate stuff
         drawablesShown = new ArrayList<Drawable>();
-        drawableFactories = new ArrayList<DrawableFactory>();
+        drawableFactories = new ArrayList<Manager>();
         sm = new SoundManager(ostFilepath, playSong, 0.2f);
 
         if(imageDirectory!=null&&!imageDirectory.equals("")){
@@ -86,9 +98,10 @@ public class MainApp extends PApplet{
         fill(bgColor);
         rect(0,0,width,height);
 
-        //record the show, start the music
+        //record the show
         if(rec){
             vid = new VideoExport(this);
+            vid.setQuality(100,128 );
             if(playSong){
                 vid.setAudioFileName(ostFilepath);
             }
@@ -99,30 +112,35 @@ public class MainApp extends PApplet{
         animationStartedEpochMs = DateTime.now().getMillis();
     }
 
+    /**
+     * The script
+     */
     private void tryAddNewFactories(){
         if(flagA){
-            drawableFactories.add(new WaveFactory(this));
+            drawableFactories.add(new WaveManager(this));
             flagA = false;
         }
         if(flagB && getSecondsElapsed() > 1){
-            //drawableFactories.add(new BandFactory(this, 1, 50, imageStore));
+            //drawableFactories.add(new BandManager(this, 1, 50, imageStore));
             flagB = false;
         }
         if(flagC && getSecondsElapsed() > -1){
-            //drawableFactories.add(new BandFactory(this, 0, 50, imageStore));
+            //drawableFactories.add(new BandManager(this, 0, 50, imageStore));
             flagC = false;
         }
     }
 
-
+    /**
+     * Happens every frame
+     */
     public void draw() {
-//        paintCrosshairs();
+//        paintCrosshairs(); // symmetry check
         checkInput();
         if(!pause){
             SoundAnalysis sa = sm.getFreshAnalysis();
 
-            if(sa.peak){
-                fill(3,0,0, bgAlpha);
+            if(sa.getPeak()){
+                fill(10,0,0, bgAlpha);
             }else{
                 fill(bgColor, bgAlpha);
             }
@@ -137,7 +155,7 @@ public class MainApp extends PApplet{
 
             //proc the factories
             tryAddNewFactories();
-            for (DrawableFactory f : drawableFactories){
+            for (Manager f : drawableFactories){
                 drawablesShown = f.update(drawablesShown,sa);
             }
 
@@ -151,10 +169,8 @@ public class MainApp extends PApplet{
 
             if (rec) {
                 vid.saveFrame();
-               //println("video time: " + vid.getCurrentTime());
             }
         }
-
         bgColor = 0;
     }
 
@@ -201,7 +217,11 @@ public class MainApp extends PApplet{
         return filenames;
     }
 
-    private int getSecondsElapsed(){
+    private static  int getSecondsElapsed(){
         return  (int) (DateTime.now().minus(animationStartedEpochMs).getMillis()/1000);
     }
+
+
+
+
 }

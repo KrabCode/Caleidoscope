@@ -4,3 +4,6 @@ processing-movie.mp4
 *.xml
 ffmpeg.txt
 *.iml
+*.mp4
+/ffmpeg-audio.txt
+/settings.json

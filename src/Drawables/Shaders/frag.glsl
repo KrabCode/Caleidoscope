@@ -8,7 +8,7 @@ float drawLine(vec2 p1, vec2 p2) {
   float b = abs(distance(p2, uv));
   float c = abs(distance(p1, p2));
 
-  if ( a >= c || b >=  c ) return;
+  if ( a >= c || b >=  c ) return 0.0f;
 
   float p = (a + b + c) * 0.5;
 

@@ -1,8 +1,8 @@
 package Sound;
 
 public class SoundAnalysis {
-    public float[] spectrum;
-    public boolean peak;
+    float[] spectrum;
+    boolean peak;
 
     public float getAvg(float[] src){
         float total = 0;
@@ -12,15 +12,23 @@ public class SoundAnalysis {
         return total / src.length;
     }
 
-    public float getAvg(float[] src, int trim){
-        float total = 0;
-        int i = 0;
-        for(float f : src){
-            total += f;
-            if(i++ > trim){
-                break;
+    public float getAvg(float[] src, Range range){
+        if(src != null){
+            float total = 0;
+            for(int i = range.getFrom(); i < range.getTo(); i++){
+                total += src[i];
             }
+            return total / (range.getTo() - range.getFrom());
         }
-        return total / src.length;
+        return 0;
+
+    }
+
+    public float[] getSpectrum() {
+        return spectrum;
+    }
+
+    public boolean getPeak() {
+        return peak;
     }
 }

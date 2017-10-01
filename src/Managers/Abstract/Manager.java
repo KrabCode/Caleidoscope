@@ -1,11 +1,11 @@
-package Factories;
+package Managers.Abstract;
 
-import Drawables.Drawable;
+import Drawables.Abstract.Drawable;
 import Sound.SoundAnalysis;
 
 import java.util.List;
 
-public abstract class DrawableFactory {
+public abstract class Manager {
     //MainApp calls this every frame
     public abstract List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa);
 

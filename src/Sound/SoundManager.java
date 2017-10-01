@@ -10,7 +10,8 @@ public class SoundManager {
     private PeakDetector pd;
 
     private String soundFilepath = "";
-    //    private String soundFilepath = "D:\\Music\\The Black Angels\\Passover\\05 Black Grease.mp3";
+    //TODO private String soundFolderpath = "";
+
     private float pdThreshold = 0.1f;
     private boolean peak = false;
 
@@ -43,7 +44,6 @@ public class SoundManager {
 
 
         //setup visualiser
-
         ShortFrameSegmenter sfs = new ShortFrameSegmenter(ac);
         sfs.addInput(ac.out);
         FFT fft = new FFT();
@@ -75,17 +75,14 @@ public class SoundManager {
                             }
                         }
                 );
-
-
-
         ac.start();
     }
 
     public SoundAnalysis getFreshAnalysis() {
         SoundAnalysis newAnalysis = new SoundAnalysis();
         newAnalysis.spectrum = ps.getFeatures();
-        newAnalysis.peak = peak;
-        peak = false;
+        newAnalysis.peak = peak;        //pass the current value
+        peak = false;                   //reset the peak
         return newAnalysis;
     }
 }

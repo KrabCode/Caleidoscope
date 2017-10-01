@@ -1,7 +1,8 @@
-package Factories;
+package Managers;
 
-import Drawables.*;
+import Drawables.Abstract.Drawable;
 import Drawables.Bands.*;
+import Managers.Abstract.Manager;
 import Sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class BandFactory extends DrawableFactory {
+public class BandManager extends Manager {
 
     int mold = 0;
     boolean odd = true;
@@ -21,8 +22,8 @@ public class BandFactory extends DrawableFactory {
 
     private PApplet p ;
 
-    private BandFactory(){}
-    public BandFactory(PApplet p, int mold, int spawnrate, List<PImage> imageStore){
+    private BandManager(){}
+    public BandManager(PApplet p, int mold, int spawnrate, List<PImage> imageStore){
         this.p = p;
         this.mold = mold;
         this.spawnrate = spawnrate;
