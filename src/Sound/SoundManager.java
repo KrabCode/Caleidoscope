@@ -1,11 +1,13 @@
 package Sound;
 
 import Drawables.Abstract.Drawable;
-import Managers.Abstract.Manager;
+import Drawables.Abstract.Manager;
 import beads.*;
 import processing.core.PApplet;
 
+import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SoundManager extends Manager{
@@ -13,7 +15,7 @@ public class SoundManager extends Manager{
     private PowerSpectrum ps;
     private PeakDetector pd;
     private PApplet p;
-
+    private boolean playback = true;
     private List<File> playlistQueue;
     private boolean initFlag = true;
 
@@ -22,16 +24,23 @@ public class SoundManager extends Manager{
     private float pdThreshold = 0.1f;
     private boolean peak = false;
 
-    public SoundManager (PApplet p, List<File> playlist, boolean playSong, float pdThreshold){
+    private final JFileChooser fc = new JFileChooser();
+
+
+
+    public SoundManager (PApplet p, List<File> playlist, float pdThreshold, String defaultDir){
         this.p = p;
         this.playlistQueue = playlist;
         this.pdThreshold = pdThreshold;
-        setupAudio(playSong);
+        this.playback = true; // assuming true until disproven by the open file dialog
+        this.playlistQueue = promptUserForSoundtrack(defaultDir);
+        setupAudio(playback);
     }
 
-    private void setupAudio(boolean playSong) {
+    private void setupAudio(boolean playback) {
         ac = new AudioContext();
-        if(playSong){
+
+        if(playback){
             //Higher quality analysis
             //sets the visualiser to listen to the song being played as well as play it
             tryPlayNext();
@@ -41,14 +50,14 @@ public class SoundManager extends Manager{
         }else{
             //Lower quality analysis
             //sets the visualiser to listen to the default microphone (hopefully Stereo Mix)
-            Gain g = new Gain(ac, 2, 0.6f);
-            UGen microphoneIn = ac.getAudioInput();
+            Gain g = new Gain(ac, 2, 0.1f);
+            UGen microphoneIn = ac.getAudioInput(new int[]{});
             g.addInput(microphoneIn);
             ac.out.addInput(g);
         }
 
 
-        //setup visualiser
+        //setup fast fourier transform -> the main visualiser input
         ShortFrameSegmenter sfs = new ShortFrameSegmenter(ac);
         sfs.addInput(ac.out);
         FFT fft = new FFT();
@@ -57,7 +66,7 @@ public class SoundManager extends Manager{
         fft.addListener(ps);
         ac.out.addDependent(sfs);
 
-        //setup beat detector
+        //setup beat detector -> secondary visualiser input
         SpectralDifference sd = new SpectralDifference(ac.getSampleRate());
         ps.addListener(sd);
         pd = new PeakDetector();
@@ -67,7 +76,7 @@ public class SoundManager extends Manager{
         // beat detector - this will vary on each recording
 
         pd.setThreshold(pdThreshold);
-        pd.setAlpha(.9f);
+        pd.setAlpha(.2f);
         // whenever our beat detector finds a beat, set a global
         // variable
         pd.addMessageListener
@@ -136,5 +145,34 @@ public class SoundManager extends Manager{
 
     private boolean noSongPlaying(){
         return player == null || player.isDeleted();
+    }
+
+    public List<File> promptUserForSoundtrack(String defaultDir) {
+
+        List<File> songFiles = new ArrayList<File>();
+        fc.setDialogTitle("Choose one or more .mp3 files");
+        fc.setDialogType(JFileChooser.OPEN_DIALOG);
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fc.setMultiSelectionEnabled(true);
+        fc.setCurrentDirectory(new File(defaultDir));
+
+        int returnVal = fc.showOpenDialog(p.frame);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File[] selection = (fc.getSelectedFiles());
+            int i = 0;
+            for (File file : selection) {
+                songFiles.add(file);
+                p.println(i++ + ": " + file.getName());
+            }
+            if(songFiles.isEmpty()){
+                promptUserForSoundtrack(defaultDir);
+                //recursive nagging - gotta be a bit relentless
+                //user clicked on APPROVE_OPTION and there's no files selected
+                //like wtf dude, shape up or ship out
+            }
+        }else{
+            playback = false;
+        }
+        return songFiles;
     }
 }

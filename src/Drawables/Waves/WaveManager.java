@@ -1,13 +1,10 @@
-package Managers;
+package Drawables.Waves;
 
 import Drawables.Abstract.Drawable;
-import Drawables.Waves.MidWave;
-import Drawables.Waves.HighWave;
-import Drawables.Waves.LowWave;
-import Drawables.Waves.Wave;
-import Managers.Abstract.Manager;
+import Drawables.Abstract.Manager;
 import Sound.Range;
 import Sound.SoundAnalysis;
+import Sound.SoundManager;
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -23,13 +20,7 @@ public class WaveManager extends Manager {
         this.p = p;
         wavesManaged = new ArrayList<Wave>();
 
-        Wave low = new LowWave(p, 50);
-        Wave all = new MidWave(p, 150);
-        Wave high = new HighWave(p, 250);
 
-        wavesManaged.add(low);
-        wavesManaged.add(all);
-        wavesManaged.add(high);
     }
     int i = 0;
     @Override
@@ -38,6 +29,14 @@ public class WaveManager extends Manager {
         //ON START
         if(initFlag)
         {
+            float spectrumSize = sa.getSpectrum().length;
+            Wave low = new Wave(p, 200, new Range(0, 10), 4f);
+            Wave mid = new Wave(p, 350, new Range(10,40), 8);
+            Wave high = new Wave(p, 500, new Range(40,80), 16);
+
+            wavesManaged.add(low);
+            wavesManaged.add(mid);
+            wavesManaged.add(high);
             drawables.addAll(wavesManaged);
             initFlag = false;
         }
@@ -60,7 +59,7 @@ public class WaveManager extends Manager {
             int resultIndex = 0;
             int loopIndex = 0;
             for(Wave w : wavesManaged){
-                Range r = w.getRange(spectrumLength);
+                Range r = w.getRange();
                 if(loopIndex != 0 && loopIndex < wavesManaged.size()) {
                     results[resultIndex++] = r.getFrom(); //if not first, add start
                 }

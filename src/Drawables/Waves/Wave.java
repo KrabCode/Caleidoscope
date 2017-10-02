@@ -9,32 +9,38 @@ import processing.core.PApplet;
 
 public class Wave extends Drawable {
 
-    float r, baseR, spd, alpha, strokeWeight, spokes, angleOffset, strokePeakWeight,
-    strokeR, strokeG, strokeB,strokePeakR, strokePeakG, strokePeakB;
+    float r, deviation, baseR, spd,
+            alpha, strokeWeight,
+            spokes, angleOffset, strokePeakWeight,
+            strokeR, strokeG, strokeB,
+            strokePeakR, strokePeakG, strokePeakB;
     Point center;
     PApplet p;
 
+    Range range;
+
     boolean odd = true;
 
-    public Wave(PApplet p, float r){
+    public Wave(PApplet p, float r, Range freqRange, float deviation){
         this.p = p;
         this.r = r;
         this.baseR = r;
-
+        this.deviation = deviation;
+        this.range = freqRange;
         spd = 0f;
-        alpha = 30;
+        alpha = 50;
 
-        strokeWeight = 1;
+        strokeWeight = 2;
         strokeR = 255;
         strokeG = 0;
         strokeB = 0;
 
-        strokePeakWeight = 2;
+        strokePeakWeight = 3;
         strokePeakR = 255;
         strokePeakG = 255;
         strokePeakB = 255;
 
-        spokes = 128;
+        spokes = 28; // must be even
 
         angleOffset = 0;
 
@@ -46,7 +52,7 @@ public class Wave extends Drawable {
         r+= spd;
         float avg = sa.getAvg(
                 sa.getSpectrum(),
-                getRange(sa.getSpectrum().length)
+                getRange()
         );
         Point lastTarget = null;
 
@@ -101,21 +107,21 @@ public class Wave extends Drawable {
     }
 
     /**
-     * Returns a full range. Override this to change what frequencies this wave reacts to.
+     * Returns a full range.
      * @param sa
      * @return
      */
-    public Range getRange(int spectrumLength) {
-        return new Range(0,spectrumLength);
+    public Range getRange() {
+        return range;
     }
 
     /**
      * Returns a small deviation.
      * This multiplies the distance of the high volume avgs from the standstill radius.
-     * Override to change deviation intensity.
      * @return
      */
     public float getDeviation(){
-        return 1;
+        return deviation;
     }
+
 }

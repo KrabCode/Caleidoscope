@@ -8,5 +8,5 @@ public abstract class Drawable {
      *
      * @param sa Sound Analysis including but not limited to the FFT of the current sound wave and peak detection
      */
-    abstract public void draw(SoundAnalysis sa);
+    abstract public void draw(final SoundAnalysis sa);
 }

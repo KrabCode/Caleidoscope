@@ -29,7 +29,6 @@ public class SoundSpectrumViewer extends Drawable {
             //scan across the pixels
             for(int x = 0; x < getWidth(); x++)
             {
-                //draw the standard line
                 int spectrumIndex = (x * sa.getSpectrum().length) / getWidth();
 
                 //get the color
@@ -41,6 +40,7 @@ public class SoundSpectrumViewer extends Drawable {
                     }
                 }
                 if(isPointOfInterest){
+                    //draw a special colour line
                     p.stroke(pointOfInterestColorR, pointOfInterestColorG, pointOfInterestColorB, 50);
                     p.strokeWeight(1);
                     //draw a full line
@@ -49,6 +49,7 @@ public class SoundSpectrumViewer extends Drawable {
                             bounds.getA().x + x,
                             bounds.getD().y);
                 }else {
+                    //draw the standard line
                     p.stroke(color, 50);
                     p.strokeWeight(1);
                 }

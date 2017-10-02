@@ -1,7 +1,7 @@
-package Managers;
+package Drawables.Shaders;
 
 import Drawables.Abstract.Drawable;
-import Managers.Abstract.Manager;
+import Drawables.Abstract.Manager;
 import Sound.SoundAnalysis;
 
 import java.util.List;

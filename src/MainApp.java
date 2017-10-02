@@ -1,7 +1,8 @@
 import Drawables.Abstract.Drawable;
-import Managers.Abstract.Manager;
-import Managers.SoundSpectrumViewerManager;
-import Managers.WaveManager;
+import Drawables.Abstract.Manager;
+import Drawables.Bands.BandManager;
+import Drawables.Utils.SoundSpectrumViewerManager;
+import Drawables.Waves.WaveManager;
 import Sound.SoundAnalysis;
 import Sound.SoundManager;
 import processing.core.PApplet;
@@ -11,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import processing.core.PImage;
 import Math.*;
-
-import javax.swing.*;
 
 
 /**
@@ -36,7 +35,7 @@ public class MainApp extends PApplet{
 
     //////////////////////////////   ON AIR
     private boolean rec             = false;
-    private boolean playSong        = true;
+
 
     //////////////////////////////
 
@@ -56,36 +55,24 @@ public class MainApp extends PApplet{
     private SoundManager sm;
     private float peakThreshold = .2f;
 
-    //IF THIS IS FALSE
     private boolean promptUserForSoundtrack = false;
-    private final JFileChooser fc = new JFileChooser();
+    private String defaultSoundtrackDirectory = "C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\";
     public static List<File> userSelectedSoundtrack;
-    //FILL OUT THIS
-    public static String programmerSelectedFile ="C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\07 · kyuss · space cadet.mp3";
 
     private List<PImage> imageStore;
-    private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
+    private String imageDirectory = null;//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
-    private boolean flagA = true;
-    private boolean flagB = true;
-    private boolean flagC = true;
-
-
-
-
+    private boolean flagA = true;  //concentric circles
+    private boolean flagB = true; //frequency cutting viewer
+    private boolean flagC = false;
 
     public static void main(String[] args)
     {
         PApplet.main("MainApp", args);
     }
 
-    public void paintCrosshairs(){
-        stroke(200,0,0);
-        line(0, height/2, width, height/2);
-        line(width/2, 0, width / 2, height);
-    }
-
     /**
+     * Happens once at the start. Only useful for setting window size / fullscreen and smooth.
      * Required because IDE
      * https://processing.org/tutorials/eclipse/
      */
@@ -99,31 +86,20 @@ public class MainApp extends PApplet{
         //smooth(8);
     }
 
-
-    public void printToScreen(String s){
-        //TODO
-    }
-
     /**
      * Happens once at the start
      */
     public void setup(){
-        if(promptUserForSoundtrack){
-            userSelectedSoundtrack = promptUserForSoundtrack();
-        }else{
-            userSelectedSoundtrack = new ArrayList<File>(){};
-            userSelectedSoundtrack.add(new File(programmerSelectedFile));
-        }
-
         //instantiate stuff
         drawablesShown = new ArrayList<Drawable>();
         drawableFactories = new ArrayList<Manager>();
-
-        sm = new SoundManager(this, userSelectedSoundtrack, playSong, peakThreshold);
+        sm = new SoundManager(this, userSelectedSoundtrack, peakThreshold, defaultSoundtrackDirectory);
 
         if(imageDirectory!=null && !imageDirectory.equals("")){
-            imageStore = loadImagesFromDisk(imageDirectory);
+            imageStore = IO.loadImagesFromDisk(this, imageDirectory);
         }
+
+
 
         //draw background
         noStroke();
@@ -179,8 +155,6 @@ public class MainApp extends PApplet{
         bgColor = 0;
     }
 
-    WaveManager wm;
-
     /**
      * The scripts
      */
@@ -190,7 +164,7 @@ public class MainApp extends PApplet{
             drawableFactories.add(wm);
             flagA = false;
         }
-        if(flagB){
+        if(flagB && Timekeeper.getTimer().getMsElapsed()>100){
             int [] markedFrequencies = wm.getPointsOfInterest(sm.getFreshAnalysis().getSpectrum().length);
 
             for(int i = 0; i < markedFrequencies.length; i++){
@@ -203,14 +177,35 @@ public class MainApp extends PApplet{
                     new Point(0, height-100),
                     new Point(width, height),
                     markedFrequencies
-                    ));
+            ));
             flagB = false;
         }
         if(flagC && Timekeeper.getTimer().getMsElapsed() > -1){
-            //drawableFactories.add(new BandManager(this, 0, 50, imageStore));
+            drawableFactories.add(new BandManager(this, 0, 50, imageStore));
             flagC = false;
         }
     }
+
+    public void paintCrosshairs(){
+        stroke(200,0,0);
+        line(0, height/2, width, height/2);
+        line(width/2, 0, width / 2, height);
+    }
+
+
+
+
+
+
+    public void printToScreen(String s){
+        //TODO
+    }
+
+
+
+    WaveManager wm;
+
+
 
     private void checkInput(){
         if(keyPressed){
@@ -237,47 +232,11 @@ public class MainApp extends PApplet{
 
     }
 
-    private ArrayList<PImage> loadImagesFromDisk(String imgSourceDir){
-        ArrayList<PImage> images = new ArrayList<PImage>();
-        List<String> imgFilenames = IO.getFilenamesInDirectory(imgSourceDir);
-        for(String s : imgFilenames){
-            images.add(loadImage(imgSourceDir + "\\" + s));
-        }
-        return images;
-    }
 
 
 
-    public List<File> promptUserForSoundtrack() {
-        //Handle open button action.
-        List<File> songFiles = new ArrayList<File>();
-        fc.setDialogTitle("Choose one or more .mp3 files");
-        fc.setDialogType(JFileChooser.OPEN_DIALOG);
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(true);
-        File lastDir = new File(System.getProperty("user.home") + "Music");
-        if(lastDir!=null){
-            fc.setCurrentDirectory(lastDir);
-        }else {
-            fc.setCurrentDirectory(new File(System.getProperty("user.home")));
-        }
-        int returnVal = fc.showOpenDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File[] selection = (fc.getSelectedFiles());
-            for (File file : selection) {
-                songFiles.add(file);
-            }
-            if(songFiles.isEmpty()){
-                promptUserForSoundtrack();
-                //recursive nagging - gotta be a bit relentless
-                //user clicked on APPROVE_OPTION and there's no files selected
-                //like wtf dude, shape up or ship out
-            }
-        }else{
-            playSong = false;
-        }
-        return songFiles;
-    }
+
+
 
 
 }

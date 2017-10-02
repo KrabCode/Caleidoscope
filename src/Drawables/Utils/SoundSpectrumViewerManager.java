@@ -1,8 +1,7 @@
-package Managers;
+package Drawables.Utils;
 
 import Drawables.Abstract.Drawable;
-import Drawables.Utils.SoundSpectrumViewer;
-import Managers.Abstract.Manager;
+import Drawables.Abstract.Manager;
 import Sound.SoundAnalysis;
 import processing.core.PApplet;
 
@@ -15,6 +14,8 @@ public class SoundSpectrumViewerManager extends Manager {
     PApplet p;
     Rectangle rect;
     int[] pointsOfInterest;
+    SoundSpectrumViewer soundSpectrumViewer;
+
 
     public SoundSpectrumViewerManager(PApplet p, Point start, Point end, int[] pointsOfInterest){
         this.p = p;
@@ -23,14 +24,12 @@ public class SoundSpectrumViewerManager extends Manager {
 
     }
 
-    Drawable scatterplotWaveform;
-
     @Override
     public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa) {
         //only make 1
-        if(scatterplotWaveform == null){
-            scatterplotWaveform = new SoundSpectrumViewer(p, rect, pointsOfInterest);
-            drawables.add(scatterplotWaveform);
+        if(soundSpectrumViewer == null){
+            soundSpectrumViewer = new SoundSpectrumViewer(p, rect, pointsOfInterest);
+            drawables.add(soundSpectrumViewer);
         }
         return drawables;
     }

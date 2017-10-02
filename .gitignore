@@ -9,3 +9,6 @@ ffmpeg.txt
 /settings.json
 !/libraries/
 /out/
+/libraries/
+.idea/
+libraries/

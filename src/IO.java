@@ -19,4 +19,13 @@ public class IO {
         }
         return filenames;
     }
+
+    public static ArrayList<PImage> loadImagesFromDisk(PApplet p, String imgSourceDir){
+        ArrayList<PImage> images = new ArrayList<PImage>();
+        List<String> imgFilenames = IO.getFilenamesInDirectory(imgSourceDir);
+        for(String s : imgFilenames){
+            images.add(p.loadImage(imgSourceDir + "\\" + s));
+        }
+        return images;
+    }
 }

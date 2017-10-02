@@ -1,4 +1,4 @@
-package Managers.Abstract;
+package Drawables.Abstract;
 
 import Drawables.Abstract.Drawable;
 import Sound.SoundAnalysis;
