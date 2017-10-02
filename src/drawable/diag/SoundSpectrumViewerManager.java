@@ -1,14 +1,14 @@
-package Drawables.Utils;
+package drawable.diag;
 
-import Drawables.Abstract.Drawable;
-import Drawables.Abstract.Manager;
-import Sound.Range;
-import Sound.SoundAnalysis;
+import drawable.blueprints.Drawable;
+import drawable.blueprints.Manager;
+import sound.Range;
+import sound.SoundAnalysis;
 import processing.core.PApplet;
 
 import java.util.List;
-import Math.Rectangle;
-import Math.Point;
+
+import utils.geometry.*;
 
 public class SoundSpectrumViewerManager extends Manager {
 

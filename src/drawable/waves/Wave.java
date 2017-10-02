@@ -1,10 +1,8 @@
-package Drawables.Waves;
-
-import Drawables.Abstract.Drawable;
-import Math.Angle;
-import Math.Point;
-import Sound.Range;
-import Sound.SoundAnalysis;
+package drawable.waves;
+import drawable.blueprints.Drawable;
+import utils.geometry.*;
+import sound.Range;
+import sound.SoundAnalysis;
 import processing.core.PApplet;
 
 public class Wave extends Drawable {

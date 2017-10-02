@@ -1,4 +1,4 @@
-package Math;
+package utils.geometry;
 
 public final class Rectangle {
 

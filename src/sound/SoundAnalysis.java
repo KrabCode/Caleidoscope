@@ -1,4 +1,4 @@
-package Sound;
+package sound;
 
 public class SoundAnalysis {
     float[] spectrum;

@@ -1,10 +1,11 @@
-package Drawables.Utils;
+package drawable.diag;
 
-import Drawables.Abstract.Drawable;
-import Sound.Range;
-import Sound.SoundAnalysis;
 import processing.core.PApplet;
-import Math.Rectangle;
+
+import drawable.blueprints.Drawable;
+import sound.Range;
+import sound.SoundAnalysis;
+import utils.geometry.*;
 
 import java.util.List;
 

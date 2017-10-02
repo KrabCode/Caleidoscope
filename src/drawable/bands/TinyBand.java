@@ -1,4 +1,4 @@
-package Drawables.Bands;
+package drawable.bands;
 
 import processing.core.PApplet;
 

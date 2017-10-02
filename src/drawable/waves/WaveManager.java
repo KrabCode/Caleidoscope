@@ -1,10 +1,9 @@
-package Drawables.Waves;
+package drawable.waves;
 
-import Drawables.Abstract.Drawable;
-import Drawables.Abstract.Manager;
-import Sound.Range;
-import Sound.SoundAnalysis;
-import Sound.SoundManager;
+import drawable.blueprints.Drawable;
+import drawable.blueprints.Manager;
+import sound.Range;
+import sound.SoundAnalysis;
 import processing.core.PApplet;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class WaveManager extends Manager {
 //            for(int j = 0; j < 4; j++){
 //                Wave w = new Wave(p, 50+(i++)*100);
 //                wavesManaged.add(w);
-//                drawables.add(w);
+//                drawable.add(w);
 //            }
 
         return drawables;

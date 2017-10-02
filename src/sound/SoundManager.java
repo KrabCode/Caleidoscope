@@ -1,7 +1,7 @@
-package Sound;
+package sound;
 
-import Drawables.Abstract.Drawable;
-import Drawables.Abstract.Manager;
+import drawable.blueprints.Drawable;
+import drawable.blueprints.Manager;
 import beads.*;
 import processing.core.PApplet;
 
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SoundManager extends Manager{
+
     private AudioContext ac;
     private PowerSpectrum ps;
     private PeakDetector pd;

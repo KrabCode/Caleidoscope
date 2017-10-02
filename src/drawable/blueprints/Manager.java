@@ -1,7 +1,6 @@
-package Drawables.Abstract;
+package drawable.blueprints;
 
-import Drawables.Abstract.Drawable;
-import Sound.SoundAnalysis;
+import sound.SoundAnalysis;
 
 import java.util.List;
 

@@ -1,18 +1,21 @@
-import Drawables.Abstract.Drawable;
-import Drawables.Abstract.Manager;
-import Drawables.Bands.BandManager;
-import Drawables.Utils.SoundSpectrumViewerManager;
-import Drawables.Waves.WaveManager;
-import Sound.Range;
-import Sound.SoundAnalysis;
-import Sound.SoundManager;
+import drawable.blueprints.Drawable;
+import drawable.blueprints.Manager;
+import drawable.bands.BandManager;
+import drawable.diag.SoundSpectrumViewerManager;
+import drawable.waves.WaveManager;
+import sound.Range;
+import sound.SoundAnalysis;
+import sound.SoundManager;
+import utils.IO;
+import utils.Recorder;
+import utils.Timekeeper;
 import processing.core.PApplet;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import processing.core.PImage;
-import Math.*;
+import utils.geometry.*;
 
 
 /**
@@ -29,8 +32,8 @@ public class MainApp extends PApplet{
     private int bgColor = 00; //main canvas background color
     private int bgAlpha = 15; //main canvas background alpha
 
-    private List<Manager> activeManagers;       //managing lifecycles of drawables
-    private List<Drawable> activeDrawables;     //drawables being displayed
+    private List<Manager> activeManagers;       //managing lifecycles of drawable
+    private List<Drawable> activeDrawables;     //drawable being displayed
 
     //  ON AIR
     //////////////////////////////
@@ -134,7 +137,7 @@ public class MainApp extends PApplet{
             noStroke();
             rect(0, 0, width, height);
 
-            //draw all drawables
+            //draw all drawable
             for (Drawable b : activeDrawables) {
                 b.draw(sa);
             }
@@ -175,9 +178,6 @@ public class MainApp extends PApplet{
             //need to wait a tiny little bit for the sound analysis to kick in
             // so we can ask how many spectrum parts there are
             List<Range> markedFrequencies = wm.getRangesBeingVisualised();
-
-
-
             activeManagers.add(new SoundSpectrumViewerManager(
                     this,
                     //put the viewport into the lower right corner

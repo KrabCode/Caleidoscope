@@ -1,4 +1,4 @@
-package Sound;
+package sound;
 
 public class Range {
         public Range(int from, int to){

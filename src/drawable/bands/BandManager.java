@@ -1,8 +1,8 @@
-package Drawables.Bands;
+package drawable.bands;
 
-import Drawables.Abstract.Drawable;
-import Drawables.Abstract.Manager;
-import Sound.SoundAnalysis;
+import drawable.blueprints.Drawable;
+import drawable.blueprints.Manager;
+import sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
 

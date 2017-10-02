@@ -1,4 +1,4 @@
-package Math;
+package utils.geometry;
 
 
 import static processing.core.PApplet.*;

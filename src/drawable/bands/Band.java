@@ -1,13 +1,13 @@
-package Drawables.Bands;
+package drawable.bands;
 
-import Drawables.Abstract.Drawable;
-import Sound.SoundAnalysis;
+import drawable.blueprints.Drawable;
+import sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import Math.*;
+import utils.geometry.*;
 
-import static Math.Angle.getAngle;
+import static utils.geometry.Angle.getAngle;
 
 public class Band extends Drawable {
     PApplet p;
