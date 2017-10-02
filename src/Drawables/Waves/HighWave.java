@@ -7,12 +7,17 @@ import processing.core.PApplet;
 public class HighWave extends Wave{
 
 
-    public HighWave(PApplet p, float r, float deviation) {
-        super(p, r, deviation);
+    public HighWave(PApplet p, float r) {
+        super(p, r);
     }
 
     @Override
-    public Range getRange(SoundAnalysis sa) {
-        return new Range(sa.getSpectrum().length/8, sa.getSpectrum().length/4);
+    public Range getRange(int spectrumLength) {
+        return new Range(spectrumLength/8, spectrumLength/4);
+    }
+
+    @Override
+    public float getDeviation() {
+        return 80;
     }
 }

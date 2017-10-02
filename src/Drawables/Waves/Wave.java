@@ -9,18 +9,17 @@ import processing.core.PApplet;
 
 public class Wave extends Drawable {
 
-    float r, baseR, spd, deviation, alpha, strokeWeight, spokes, angleOffset, strokePeakWeight,
+    float r, baseR, spd, alpha, strokeWeight, spokes, angleOffset, strokePeakWeight,
     strokeR, strokeG, strokeB,strokePeakR, strokePeakG, strokePeakB;
     Point center;
     PApplet p;
 
     boolean odd = true;
 
-    public Wave(PApplet p, float r, float deviation){
+    public Wave(PApplet p, float r){
         this.p = p;
         this.r = r;
         this.baseR = r;
-        this.deviation = deviation;
 
         spd = 0f;
         alpha = 30;
@@ -45,7 +44,10 @@ public class Wave extends Drawable {
     @Override
     public void draw(SoundAnalysis sa) {
         r+= spd;
-        float avg = sa.getAvg(sa.getSpectrum(), getRange(sa));
+        float avg = sa.getAvg(
+                sa.getSpectrum(),
+                getRange(sa.getSpectrum().length)
+        );
         Point lastTarget = null;
 
         //React to peaks
@@ -67,9 +69,9 @@ public class Wave extends Drawable {
 
             //SPOKES OF A WHEEL
             if(i%2==0){
-                target = Angle.getPointAtAngle(center, r + avg*deviation, angle );
+                target = Angle.getPointAtAngle(center, r + avg*getDeviation(), angle );
             }else{
-                target = Angle.getPointAtAngle(center, r - avg*deviation, angle );
+                target = Angle.getPointAtAngle(center, r - avg*getDeviation(), angle );
             }
 
 
@@ -103,8 +105,17 @@ public class Wave extends Drawable {
      * @param sa
      * @return
      */
-    public Range getRange(SoundAnalysis sa) {
-        return new Range(0,sa.getSpectrum().length);
+    public Range getRange(int spectrumLength) {
+        return new Range(0,spectrumLength);
     }
 
+    /**
+     * Returns a small deviation.
+     * This multiplies the distance of the high volume avgs from the standstill radius.
+     * Override to change deviation intensity.
+     * @return
+     */
+    public float getDeviation(){
+        return 1;
+    }
 }

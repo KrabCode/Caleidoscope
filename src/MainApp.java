@@ -4,17 +4,16 @@ import Managers.SoundSpectrumViewerManager;
 import Managers.WaveManager;
 import Sound.SoundAnalysis;
 import Sound.SoundManager;
-import org.joda.time.DateTime;
 import processing.core.PApplet;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import processing.core.PImage;
-import com.hamoid.VideoExport;
 import Math.*;
 
 import javax.swing.*;
+
 
 /**
  * The main class.
@@ -34,13 +33,11 @@ public class MainApp extends PApplet{
 
     private List<Manager> drawableFactories;
     private List<Drawable> drawablesShown;
-    private List<PImage> imageStore;
-    private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
-
 
     //////////////////////////////   ON AIR
     private boolean rec             = false;
     private boolean playSong        = true;
+
     //////////////////////////////
 
     private boolean fullScreen = false;
@@ -49,9 +46,7 @@ public class MainApp extends PApplet{
 
     private boolean pause = false;
 
-    private VideoExport vid;
-    private int videoQualityPercent = 100;
-    private int audioQualityKbps = 192;
+    Recorder recorder;
 
     private boolean fadeout = false;
     private float fadeMag = 0;
@@ -59,23 +54,25 @@ public class MainApp extends PApplet{
     private float fadeMin = 0;
 
     private SoundManager sm;
-    //TODO private String ostFolderpath = "";
-    //  private String ostFilepath = "D:\\Torrents\\Exuma\\Reincarnation\\06 Exuma - Pay Me What You Owe Me.mp3";
-    // private String ostFilepath = "C:\\Users\\Jakub\\Downloads\\True Detective - Intro  Opening Song - Theme (The Handsome Family - Far From Any Road) + LYRICS.mp3";
     private float peakThreshold = .2f;
+
+    //IF THIS IS FALSE
     private boolean promptUserForSoundtrack = false;
-    //gets overwritten if
-    private String ostFilepath = "C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\07 · kyuss · space cadet.mp3";
+    private final JFileChooser fc = new JFileChooser();
+    public static List<File> userSelectedSoundtrack;
+    //FILL OUT THIS
+    public static String programmerSelectedFile ="C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\07 · kyuss · space cadet.mp3";
+
+    private List<PImage> imageStore;
+    private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;
     private boolean flagB = true;
     private boolean flagC = true;
 
 
-    private static long animationStartedEpochMs = 0;
 
-    //Create a file chooser
-    private final JFileChooser fc = new JFileChooser();
+
 
     public static void main(String[] args)
     {
@@ -112,13 +109,17 @@ public class MainApp extends PApplet{
      */
     public void setup(){
         if(promptUserForSoundtrack){
-            promptUserForSoundtrack();
+            userSelectedSoundtrack = promptUserForSoundtrack();
+        }else{
+            userSelectedSoundtrack = new ArrayList<File>(){};
+            userSelectedSoundtrack.add(new File(programmerSelectedFile));
         }
 
         //instantiate stuff
         drawablesShown = new ArrayList<Drawable>();
         drawableFactories = new ArrayList<Manager>();
-        sm = new SoundManager(ostFilepath, playSong, peakThreshold);
+
+        sm = new SoundManager(this, userSelectedSoundtrack, playSong, peakThreshold);
 
         if(imageDirectory!=null && !imageDirectory.equals("")){
             imageStore = loadImagesFromDisk(imageDirectory);
@@ -131,16 +132,11 @@ public class MainApp extends PApplet{
 
         //record the show
         if(rec){
-            vid = new VideoExport(this);
-            vid.setQuality(videoQualityPercent, audioQualityKbps);
-            if(playSong){
-                vid.setAudioFileName(ostFilepath);
-            }
-            vid.startMovie();
+            recorder = new Recorder(this);
         }
 
         //the show has started, remember the time
-        animationStartedEpochMs = DateTime.now().getMillis();
+        Timekeeper.getTimer().setStart();
     }
 
     /**
@@ -177,32 +173,40 @@ public class MainApp extends PApplet{
             }
 
             if (rec) {
-                vid.saveFrame();
+                recorder.saveFrame();
             }
         }
         bgColor = 0;
     }
+
+    WaveManager wm;
 
     /**
      * The scripts
      */
     private void tryAddNewFactories(){
         if(flagA){
-            drawableFactories.add(new WaveManager(this));
+            wm = new WaveManager(this);
+            drawableFactories.add(wm);
             flagA = false;
         }
         if(flagB){
+            int [] markedFrequencies = wm.getPointsOfInterest(sm.getFreshAnalysis().getSpectrum().length);
+
+            for(int i = 0; i < markedFrequencies.length; i++){
+                println("monitoring freq " + i + ": " + markedFrequencies[i]);
+            }
+
             drawableFactories.add(new SoundSpectrumViewerManager(
                     this,
                     //put the viewport into the lower right corner
                     new Point(0, height-100),
-                    new Point(256, height),
-                    //sets the points of interest
-                    new int[]{64,32,16}
+                    new Point(width, height),
+                    markedFrequencies
                     ));
             flagB = false;
         }
-        if(flagC && getSecondsElapsed() > -1){
+        if(flagC && Timekeeper.getTimer().getMsElapsed() > -1){
             //drawableFactories.add(new BandManager(this, 0, 50, imageStore));
             flagC = false;
         }
@@ -211,14 +215,17 @@ public class MainApp extends PApplet{
     private void checkInput(){
         if(keyPressed){
             if(key=='w' && rec) {
-                vid.endMovie();
+                recorder.endRecording();
                 rec = false;
             }
             if(key=='f'){
                 fadeout = true;
             }
-            if(key=='o'){
-
+            if(key=='.'){
+                sm.tryPlayNext();
+            }
+            if(key==','){
+                //sm.tryPlayNext();
             }
         }
 
@@ -239,30 +246,38 @@ public class MainApp extends PApplet{
         return images;
     }
 
-    private static float getSecondsElapsed() {
-        return (DateTime.now().minus(animationStartedEpochMs).getMillis() / 1000);
-    }
 
-    File lastDir;
-    public void promptUserForSoundtrack() {
+
+    public List<File> promptUserForSoundtrack() {
         //Handle open button action.
-        fc.setDialogTitle("Please select an .mp3 file");
+        List<File> songFiles = new ArrayList<File>();
+        fc.setDialogTitle("Choose one or more .mp3 files");
+        fc.setDialogType(JFileChooser.OPEN_DIALOG);
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fc.setMultiSelectionEnabled(true);
+        File lastDir = new File(System.getProperty("user.home") + "Music");
         if(lastDir!=null){
             fc.setCurrentDirectory(lastDir);
+        }else {
+            fc.setCurrentDirectory(new File(System.getProperty("user.home")));
         }
         int returnVal = fc.showOpenDialog(frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            lastDir = fc.getCurrentDirectory();
-            //This is where a real application would open the file.
-            println("Opening: " + file.getName() + ".");
-            if(!file.getAbsolutePath().contains(".mp3")){
+            File[] selection = (fc.getSelectedFiles());
+            for (File file : selection) {
+                songFiles.add(file);
+            }
+            if(songFiles.isEmpty()){
                 promptUserForSoundtrack();
-            }else{
-                ostFilepath = file.getAbsolutePath();
+                //recursive nagging - gotta be a bit relentless
+                //user clicked on APPROVE_OPTION and there's no files selected
+                //like wtf dude, shape up or ship out
             }
         }else{
-            // private String ostFilepath
+            playSong = false;
         }
+        return songFiles;
     }
+
+
 }

@@ -7,12 +7,17 @@ import processing.core.PApplet;
 
 public class MidWave extends Wave {
 
-    public MidWave(PApplet p, float r, float deviation) {
-        super(p, r, deviation);
+    public MidWave(PApplet p, float r) {
+        super(p, r);
     }
 
     @Override
-    public Range getRange(SoundAnalysis sa) {
-        return new Range(sa.getSpectrum().length / 16, sa.getSpectrum().length / 8);
+    public Range getRange(int spectrumLength) {
+        return new Range(spectrumLength / 16, spectrumLength / 8);
+    }
+
+    @Override
+    public float getDeviation() {
+        return 20;
     }
 }

@@ -7,3 +7,5 @@ ffmpeg.txt
 *.mp4
 /ffmpeg-audio.txt
 /settings.json
+!/libraries/
+/out/

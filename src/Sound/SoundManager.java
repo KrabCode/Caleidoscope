@@ -1,22 +1,30 @@
 package Sound;
 
+import Drawables.Abstract.Drawable;
+import Managers.Abstract.Manager;
 import beads.*;
+import processing.core.PApplet;
 
 import java.io.File;
+import java.util.List;
 
-public class SoundManager {
+public class SoundManager extends Manager{
     private AudioContext ac;
     private PowerSpectrum ps;
     private PeakDetector pd;
+    private PApplet p;
 
-    private String soundFilepath = "";
-    //TODO private String soundFolderpath = "";
+    private List<File> playlistQueue;
+    private boolean initFlag = true;
+
+    SamplePlayer player;
 
     private float pdThreshold = 0.1f;
     private boolean peak = false;
 
-    public SoundManager (String soundFilepath, boolean playSong, float pdThreshold){
-        this.soundFilepath = soundFilepath;
+    public SoundManager (PApplet p, List<File> playlist, boolean playSong, float pdThreshold){
+        this.p = p;
+        this.playlistQueue = playlist;
         this.pdThreshold = pdThreshold;
         setupAudio(playSong);
     }
@@ -26,10 +34,7 @@ public class SoundManager {
         if(playSong){
             //Higher quality analysis
             //sets the visualiser to listen to the song being played as well as play it
-            File soundFile = new File(soundFilepath);
-            String audioFileName = soundFile.getAbsolutePath();
-            SamplePlayer player = new SamplePlayer(ac, SampleManager.sample(audioFileName));
-
+            tryPlayNext();
             Gain g = new Gain(ac, 2, 0.2f);
             g.addInput(player);
             ac.out.addInput(g);
@@ -84,5 +89,52 @@ public class SoundManager {
         newAnalysis.peak = peak;        //pass the current value
         peak = false;                   //reset the peak
         return newAnalysis;
+    }
+
+    @Override
+    public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa) {
+        if(!noSongPlaying()){
+            tryPlayNext();
+        }
+        return drawables;
+    }
+
+    public void tryPlayNext(){
+        if(!initFlag){
+            playlistQueue.remove(0);
+        }
+        try{
+            playSong(playlistQueue.get(0).getAbsolutePath());
+        }catch (Exception ex){
+            ex.printStackTrace();
+            if(playlistQueue.size()>0){
+                tryPlayNext();
+            }
+        }
+        initFlag = false;
+    }
+
+    private void playSong(String soundFilepath){
+        File song = new File(soundFilepath);
+        if(isSongPlayable(song)){
+            String path = song.getAbsolutePath();
+            if(player == null){
+                player = new SamplePlayer(ac, SampleManager.sample(path));
+            }else{
+                player.setSample(SampleManager.sample(path));
+            }
+            player.setKillOnEnd(true);
+        }
+    }
+
+    private boolean isSongPlayable(File song){
+        if(song.getAbsolutePath().contains(".mp3")){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean noSongPlaying(){
+        return player == null || player.isDeleted();
     }
 }

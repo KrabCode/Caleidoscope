@@ -29,17 +29,19 @@ public class SoundSpectrumViewer extends Drawable {
             //scan across the pixels
             for(int x = 0; x < getWidth(); x++)
             {
+                //draw the standard line
+                int spectrumIndex = (x * sa.getSpectrum().length) / getWidth();
+
                 //get the color
                 boolean isPointOfInterest = false;
-                for (int i = 0; i < pointsOfInterest.length; i++)
-                {
-                    if(pointsOfInterest[i] == x){
+                for (float pointOfInterest : pointsOfInterest){
+                    if(pointOfInterest == spectrumIndex){
                         isPointOfInterest=true;
                         break;
                     }
                 }
                 if(isPointOfInterest){
-                    p.stroke(pointOfInterestColorR, pointOfInterestColorG, pointOfInterestColorB);
+                    p.stroke(pointOfInterestColorR, pointOfInterestColorG, pointOfInterestColorB, 50);
                     p.strokeWeight(1);
                     //draw a full line
                     p.line(bounds.getA().x + x,
@@ -49,19 +51,13 @@ public class SoundSpectrumViewer extends Drawable {
                 }else {
                     p.stroke(color, 50);
                     p.strokeWeight(1);
-
                 }
 
-                //draw the standard line
-                int spectrumIndex = (x * sa.getSpectrum().length) / getWidth();
                 int barHeight = Math.min((int)(sa.getSpectrum()[spectrumIndex] * getHeight()), getHeight() - 1);
                 p.line(bounds.getA().x + x,
                         bounds.getD().y,
                         bounds.getA().x + x,
                         bounds.getD().y - barHeight);
-
-
-
             }
         }
     }
