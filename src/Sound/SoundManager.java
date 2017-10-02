@@ -155,7 +155,8 @@ public class SoundManager extends Manager{
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fc.setMultiSelectionEnabled(true);
         fc.setCurrentDirectory(new File(defaultDir));
-
+        fc.setApproveButtonText("Play");
+        fc.setBounds(200,200,400,800);
         int returnVal = fc.showOpenDialog(p.frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] selection = (fc.getSelectedFiles());

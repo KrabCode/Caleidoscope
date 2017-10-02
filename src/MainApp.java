@@ -3,6 +3,7 @@ import Drawables.Abstract.Manager;
 import Drawables.Bands.BandManager;
 import Drawables.Utils.SoundSpectrumViewerManager;
 import Drawables.Waves.WaveManager;
+import Sound.Range;
 import Sound.SoundAnalysis;
 import Sound.SoundManager;
 import processing.core.PApplet;
@@ -25,45 +26,49 @@ import Math.*;
  */
 public class MainApp extends PApplet{
 
+    private int bgColor = 00; //main canvas background color
+    private int bgAlpha = 15; //main canvas background alpha
 
+    private List<Manager> activeManagers;       //managing lifecycles of drawables
+    private List<Drawable> activeDrawables;     //drawables being displayed
 
-    private int bgColor = 00;
-    private int bgAlpha = 15;
-
-    private List<Manager> drawableFactories;
-    private List<Drawable> drawablesShown;
-
-    //////////////////////////////   ON AIR
-    private boolean rec             = false;
-
-
+    //  ON AIR
     //////////////////////////////
+    private boolean rec   = false;
+    //////////////////////////////
+    //
 
-    private boolean fullScreen = false;
+    //canvas dimensions
+    private boolean fullScreen = true;
     private int windowWidth = 800;
     private int windowHeight = 800;
+    //
 
+    //simple canvaswide effects
     private boolean pause = false;
-
-    Recorder recorder;
 
     private boolean fadeout = false;
     private float fadeMag = 0;
     private float fadeSpd = 3f;
     private float fadeMin = 0;
+    //
 
-    private SoundManager sm;
-    private float peakThreshold = .2f;
+    private Recorder recorder;  //wrapper for the org.hamoid.VideoExport library
+    private SoundManager sm;    //wrapper for the Beads library
+
+
 
     private boolean promptUserForSoundtrack = false;
     private String defaultSoundtrackDirectory = "C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\";
     public static List<File> userSelectedSoundtrack;
+    private float peakThreshold = .2f;  //peak detection threshold, lower means peaks happen less often
+    //TODO automate setting peak threshold for an approx number of peaks / minute
 
     private List<PImage> imageStore;
     private String imageDirectory = null;//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;  //concentric circles
-    private boolean flagB = true; //frequency cutting viewer
+    private boolean flagB = true;  //frequency cutting viewer
     private boolean flagC = false;
 
     public static void main(String[] args)
@@ -91,8 +96,8 @@ public class MainApp extends PApplet{
      */
     public void setup(){
         //instantiate stuff
-        drawablesShown = new ArrayList<Drawable>();
-        drawableFactories = new ArrayList<Manager>();
+        activeDrawables = new ArrayList<Drawable>();
+        activeManagers = new ArrayList<Manager>();
         sm = new SoundManager(this, userSelectedSoundtrack, peakThreshold, defaultSoundtrackDirectory);
 
         if(imageDirectory!=null && !imageDirectory.equals("")){
@@ -129,17 +134,17 @@ public class MainApp extends PApplet{
             noStroke();
             rect(0, 0, width, height);
 
-            //draw bands
-            for (Drawable b : drawablesShown) {
+            //draw all drawables
+            for (Drawable b : activeDrawables) {
                 b.draw(sa);
             }
 
-            //proc the factories
-            tryAddNewFactories();
-            for (Manager f : drawableFactories){
-                drawablesShown = f.update(drawablesShown,sa);
+            //instantiate new managers if needed
+            tryInstantiateManagers();
+            for (Manager f : activeManagers){
+                //update every manager object
+                activeDrawables = f.update(activeDrawables,sa);
             }
-
             if (fadeout) {
                 if (fadeMag < 255 - fadeMin) {
                     tint(255 - (fadeMag += fadeSpd));
@@ -147,7 +152,6 @@ public class MainApp extends PApplet{
                     tint(fadeMin);
                 }
             }
-
             if (rec) {
                 recorder.saveFrame();
             }
@@ -155,23 +159,26 @@ public class MainApp extends PApplet{
         bgColor = 0;
     }
 
+    WaveManager wm; //only used in this method
     /**
-     * The scripts
+     * Attempts to construct activeManagers
+     * (churning out parts of the show)
+     * in effect deploying them at set moments.
      */
-    private void tryAddNewFactories(){
+    private void tryInstantiateManagers(){
         if(flagA){
             wm = new WaveManager(this);
-            drawableFactories.add(wm);
+            activeManagers.add(wm);
             flagA = false;
         }
         if(flagB && Timekeeper.getTimer().getMsElapsed()>100){
-            int [] markedFrequencies = wm.getPointsOfInterest(sm.getFreshAnalysis().getSpectrum().length);
+            //need to wait a tiny little bit for the sound analysis to kick in
+            // so we can ask how many spectrum parts there are
+            List<Range> markedFrequencies = wm.getRangesBeingVisualised();
 
-            for(int i = 0; i < markedFrequencies.length; i++){
-                println("monitoring freq " + i + ": " + markedFrequencies[i]);
-            }
 
-            drawableFactories.add(new SoundSpectrumViewerManager(
+
+            activeManagers.add(new SoundSpectrumViewerManager(
                     this,
                     //put the viewport into the lower right corner
                     new Point(0, height-100),
@@ -181,7 +188,7 @@ public class MainApp extends PApplet{
             flagB = false;
         }
         if(flagC && Timekeeper.getTimer().getMsElapsed() > -1){
-            drawableFactories.add(new BandManager(this, 0, 50, imageStore));
+            activeManagers.add(new BandManager(this, 0, 50, imageStore));
             flagC = false;
         }
     }
@@ -192,20 +199,9 @@ public class MainApp extends PApplet{
         line(width/2, 0, width / 2, height);
     }
 
-
-
-
-
-
     public void printToScreen(String s){
-        //TODO
+        //TODO print information, such as the current song or error to screen
     }
-
-
-
-    WaveManager wm;
-
-
 
     private void checkInput(){
         if(keyPressed){
@@ -229,14 +225,5 @@ public class MainApp extends PApplet{
         }else{
             pause = false;
         }
-
     }
-
-
-
-
-
-
-
-
 }

@@ -2,6 +2,7 @@ package Drawables.Utils;
 
 import Drawables.Abstract.Drawable;
 import Drawables.Abstract.Manager;
+import Sound.Range;
 import Sound.SoundAnalysis;
 import processing.core.PApplet;
 
@@ -13,14 +14,14 @@ public class SoundSpectrumViewerManager extends Manager {
 
     PApplet p;
     Rectangle rect;
-    int[] pointsOfInterest;
+    List<Range> rangesBeingVisualised;
     SoundSpectrumViewer soundSpectrumViewer;
 
 
-    public SoundSpectrumViewerManager(PApplet p, Point start, Point end, int[] pointsOfInterest){
+    public SoundSpectrumViewerManager(PApplet p, Point start, Point end, List<Range> rangesBeingVisualised){
         this.p = p;
         this.rect = Rectangle.fromPoints(start, end);
-        this.pointsOfInterest = pointsOfInterest;
+        this.rangesBeingVisualised = rangesBeingVisualised;
 
     }
 
@@ -28,8 +29,14 @@ public class SoundSpectrumViewerManager extends Manager {
     public List<Drawable> update(List<Drawable> drawables, SoundAnalysis sa) {
         //only make 1
         if(soundSpectrumViewer == null){
-            soundSpectrumViewer = new SoundSpectrumViewer(p, rect, pointsOfInterest);
+            soundSpectrumViewer = new SoundSpectrumViewer(p, rect, rangesBeingVisualised);
             drawables.add(soundSpectrumViewer);
+
+            p.println("Monitoring the following frequency ranges");
+            for(int i = 0; i < rangesBeingVisualised.size(); i++){
+                p.println( i + ":\tfrom\t"+ rangesBeingVisualised.get(i).getFrom() + " | to\t" + rangesBeingVisualised.get(i).getTo());
+            }
+
         }
         return drawables;
     }

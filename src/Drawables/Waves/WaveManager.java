@@ -53,22 +53,11 @@ public class WaveManager extends Manager {
     }
 
 
-    public int[] getPointsOfInterest(int spectrumLength){
-        if(wavesManaged !=null && wavesManaged.size() > 0){
-            int[] results = new int[wavesManaged.size()-1];
-            int resultIndex = 0;
-            int loopIndex = 0;
-            for(Wave w : wavesManaged){
-                Range r = w.getRange();
-                if(loopIndex != 0 && loopIndex < wavesManaged.size()) {
-                    results[resultIndex++] = r.getFrom(); //if not first, add start
-                }
-                loopIndex++;
-            }
-            return results;
+    public List<Range> getRangesBeingVisualised(){
+        List<Range> results = new ArrayList<>();
+        for(Wave w : wavesManaged){
+            results.add(w.range);
         }
-        return new int[]{};
+        return results;
     }
-
-
 }
