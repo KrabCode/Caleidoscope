@@ -1,5 +1,5 @@
-import drawable.blueprints.Drawable;
-import drawable.blueprints.Manager;
+import drawable.Drawable;
+import drawable.Manager;
 import drawable.bands.BandManager;
 import drawable.diag.SoundSpectrumViewerManager;
 import drawable.waves.WaveManager;
@@ -71,7 +71,7 @@ public class MainApp extends PApplet{
     private String imageDirectory = null;//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;  //concentric circles
-    private boolean flagB = true;  //frequency cutting viewer
+    private boolean flagB = false;  //frequency cutting viewer
     private boolean flagC = false;
 
     public static void main(String[] args)

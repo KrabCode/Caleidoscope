@@ -2,7 +2,7 @@ package drawable.diag;
 
 import processing.core.PApplet;
 
-import drawable.blueprints.Drawable;
+import drawable.Drawable;
 import sound.Range;
 import sound.SoundAnalysis;
 import utils.geometry.*;

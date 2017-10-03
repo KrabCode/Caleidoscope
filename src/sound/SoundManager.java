@@ -1,7 +1,7 @@
 package sound;
 
-import drawable.blueprints.Drawable;
-import drawable.blueprints.Manager;
+import drawable.Drawable;
+import drawable.Manager;
 import beads.*;
 import processing.core.PApplet;
 

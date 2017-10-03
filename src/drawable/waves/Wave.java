@@ -1,5 +1,5 @@
 package drawable.waves;
-import drawable.blueprints.Drawable;
+import drawable.Drawable;
 import utils.geometry.*;
 import sound.Range;
 import sound.SoundAnalysis;

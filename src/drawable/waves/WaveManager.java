@@ -1,7 +1,7 @@
 package drawable.waves;
 
-import drawable.blueprints.Drawable;
-import drawable.blueprints.Manager;
+import drawable.Drawable;
+import drawable.Manager;
 import sound.Range;
 import sound.SoundAnalysis;
 import processing.core.PApplet;

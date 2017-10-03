@@ -17,6 +17,7 @@ public class Angle {
      */
     public static Point getPointAtAngle(Point center, float radius, float angle) {
         return new Point(
+                //TODO try this without parsing strings like a normal person
                 Float.parseFloat(center.x + radius * cos(angle * PI / 180)+""),
                 Float.parseFloat(center.y + radius * sin(angle * PI / 180)+"")
         );

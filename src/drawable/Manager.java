@@ -1,4 +1,4 @@
-package drawable.blueprints;
+package drawable;
 
 import sound.SoundAnalysis;
 

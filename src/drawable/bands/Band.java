@@ -1,6 +1,6 @@
 package drawable.bands;
 
-import drawable.blueprints.Drawable;
+import drawable.Drawable;
 import sound.SoundAnalysis;
 import processing.core.PApplet;
 import processing.core.PImage;
