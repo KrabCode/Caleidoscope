@@ -34,7 +34,7 @@ public class SoundSpectrumViewerManager extends Manager {
 
             p.println("Monitoring the following frequency ranges");
             for(int i = 0; i < rangesBeingVisualised.size(); i++){
-                p.println( i + ":\tfrom\t"+ rangesBeingVisualised.get(i).getFrom() + " | to\t" + rangesBeingVisualised.get(i).getTo());
+                p.println( i + ":\tfrom\t"+ rangesBeingVisualised.get(i).getFrom() + "\tto\t" + rangesBeingVisualised.get(i).getTo());
             }
 
         }

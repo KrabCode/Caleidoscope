@@ -65,14 +65,14 @@ public class MainApp extends PApplet{
     private String defaultSoundtrackDirectory = "C:\\Users\\Jakub\\Desktop\\Clutter\\Roadtrip\\Psychedelic\\";
     public static List<File> userSelectedSoundtrack;
     private float peakThreshold = .2f;  //peak detection threshold, lower means peaks happen less often
-    //TODO automate setting peak threshold for an approx number of peaks / minute
+    //TODO automate setting peak threshold to approximate a given number of peaks / minute
 
     private List<PImage> imageStore;
-    private String imageDirectory = null;//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
+    private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;  //concentric circles
-    private boolean flagB = false;  //frequency cutting viewer
-    private boolean flagC = false;
+    private boolean flagB = true;  //frequency cutting viewer
+    private boolean flagC = false; //bands (requires non null imageDirectory)
 
     public static void main(String[] args)
     {
