@@ -28,8 +28,7 @@ public class WaveManager extends Manager {
         //ON START
         if(initFlag)
         {
-            float spectrumSize = sa.getSpectrum().length;
-            Wave low = new Wave(p, 200, new Range(0, 10), 4f);
+            Wave low = new Wave(p, 200, new Range(0, 10), 2);
             Wave mid = new Wave(p, 350, new Range(10,40), 8);
             Wave high = new Wave(p, 500, new Range(40,80), 16);
 

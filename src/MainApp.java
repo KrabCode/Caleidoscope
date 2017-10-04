@@ -3,19 +3,18 @@ import drawable.Manager;
 import drawable.bands.BandManager;
 import drawable.diag.SoundSpectrumViewerManager;
 import drawable.waves.WaveManager;
+import processing.core.*;
 import sound.Range;
 import sound.SoundAnalysis;
 import sound.SoundManager;
 import utils.IO;
 import utils.Recorder;
 import utils.Timekeeper;
-import processing.core.PApplet;
+import utils.geometry.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import processing.core.PImage;
-import utils.geometry.*;
 
 
 /**
@@ -107,8 +106,6 @@ public class MainApp extends PApplet{
             imageStore = IO.loadImagesFromDisk(this, imageDirectory);
         }
 
-
-
         //draw background
         noStroke();
         fill(bgColor);
@@ -162,7 +159,7 @@ public class MainApp extends PApplet{
         bgColor = 0;
     }
 
-    WaveManager wm; //only used in this method
+    WaveManager wm; //only used in tryInstantiateManagers
     /**
      * Attempts to construct activeManagers
      * (churning out parts of the show)
@@ -174,7 +171,7 @@ public class MainApp extends PApplet{
             activeManagers.add(wm);
             flagA = false;
         }
-        if(flagB && Timekeeper.getTimer().getMsElapsed()>100){
+        if(flagB && Timekeeper.getTimer().getMsElapsed()>1000){
             //need to wait a tiny little bit for the sound analysis to kick in
             // so we can ask how many spectrum parts there are
             List<Range> markedFrequencies = wm.getRangesBeingVisualised();

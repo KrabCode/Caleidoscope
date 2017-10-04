@@ -51,7 +51,7 @@ public class SoundManager extends Manager{
         }else{
             //Lower quality analysis
             //sets the visualiser to listen to the default microphone (hopefully Stereo Mix)
-            Gain g = new Gain(ac, 2, 0.1f);
+            Gain g = new Gain(ac, 2, 0.5f);
             UGen microphoneIn = ac.getAudioInput(new int[]{});
             g.addInput(microphoneIn);
             ac.out.addInput(g);
