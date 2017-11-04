@@ -15,7 +15,10 @@ public class SoundSpectrumViewer extends Drawable {
     PApplet p;
     List<Range> beingVisualised;
 
+
+
     int color =255;
+
     int pointOfInterestColorFromR = 0;
     int pointOfInterestColorFromG = 0;
     int pointOfInterestColorFromB = 255;
@@ -77,7 +80,7 @@ public class SoundSpectrumViewer extends Drawable {
 
                 if(isRangeStart(spectrumIndex)){
                     //draw first special colour line
-                    p.stroke(pointOfInterestColorFromR, pointOfInterestColorFromG, pointOfInterestColorFromB, 50);
+                    p.stroke(pointOfInterestColorFromR, pointOfInterestColorFromG, pointOfInterestColorFromB, 20);
                     p.strokeWeight(1);
                     //draw a full line
                     p.line(bounds.getA().x + x,
@@ -87,7 +90,7 @@ public class SoundSpectrumViewer extends Drawable {
 
                 }else if (isRangeEnd(spectrumIndex)){
                     //draw second special colour line
-                    p.stroke(pointOfInterestColorToR, pointOfInterestColorToG, pointOfInterestColorToB, 50);
+                    p.stroke(pointOfInterestColorToR, pointOfInterestColorToG, pointOfInterestColorToB, 20);
                     p.strokeWeight(1);
                     //draw a full line
                     p.line(bounds.getA().x + x,

@@ -3,19 +3,18 @@ import drawable.Manager;
 import drawable.bands.BandManager;
 import drawable.diag.SoundSpectrumViewerManager;
 import drawable.waves.WaveManager;
+import processing.core.*;
 import sound.Range;
 import sound.SoundAnalysis;
 import sound.SoundManager;
 import utils.IO;
 import utils.Recorder;
 import utils.Timekeeper;
-import processing.core.PApplet;
+import utils.geometry.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import processing.core.PImage;
-import utils.geometry.*;
 
 
 /**
@@ -42,7 +41,7 @@ public class MainApp extends PApplet{
     //
 
     //canvas dimensions
-    private boolean fullScreen = true ;
+    private boolean fullScreen = true;
     private int windowWidth = 800;
     private int windowHeight = 800;
     //
@@ -56,7 +55,7 @@ public class MainApp extends PApplet{
     private float fadeMin = 0;
     //
 
-    private Recorder recorder;  //wrapper for the VideoExport library, useful as long as you don't need synced audio
+    private Recorder recorder;  //wrapper for the org.hamoid.VideoExport library
     private SoundManager sm;    //wrapper for the Beads library
 
 
@@ -68,18 +67,11 @@ public class MainApp extends PApplet{
     //TODO automate setting peak threshold to approximate a given number of peaks / minute
 
     private List<PImage> imageStore;
-    private String imageDirectory = "";//"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
-
-    //tryInstantiateManagers() properties
+    private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;  //concentric circles
     private boolean flagB = true;  //frequency cutting viewer
-    private boolean flagD = false; //bands (requires non null imageDirectory)
-
-    private WaveManager wm;
-    private SoundSpectrumViewerManager ssvm;
-    private List<Range> rangesBeingVisualised;
-    private boolean interactive = true;  //interactive viewer can set wave ranges
+    private boolean flagC = false; //bands (requires non null imageDirectory)
 
     public static void main(String[] args)
     {
@@ -110,6 +102,10 @@ public class MainApp extends PApplet{
         activeManagers = new ArrayList<Manager>();
         sm = new SoundManager(this, userSelectedSoundtrack, peakThreshold, defaultSoundtrackDirectory);
 
+        if(imageDirectory!=null && !imageDirectory.equals("")){
+            imageStore = IO.loadImagesFromDisk(this, imageDirectory);
+        }
+
         //draw background
         noStroke();
         fill(bgColor);
@@ -130,7 +126,6 @@ public class MainApp extends PApplet{
     public void draw() {
 //        paintCrosshairs(); // symmetry check
         checkInput();
-
         if(!pause){
             SoundAnalysis sa = sm.getFreshAnalysis();
 
@@ -164,7 +159,7 @@ public class MainApp extends PApplet{
         bgColor = 0;
     }
 
-
+    WaveManager wm; //only used in tryInstantiateManagers
     /**
      * Attempts to construct activeManagers
      * (churning out parts of the show)
@@ -176,24 +171,22 @@ public class MainApp extends PApplet{
             activeManagers.add(wm);
             flagA = false;
         }
-        if(flagB && Timekeeper.getTimer().getMsElapsed()>100){
-            rangesBeingVisualised = wm.getRangesBeingVisualised();
-            ssvm = new SoundSpectrumViewerManager(
+        if(flagB && Timekeeper.getTimer().getMsElapsed()>1000){
+            //need to wait a tiny little bit for the sound analysis to kick in
+            // so we can ask how many spectrum parts there are
+            List<Range> markedFrequencies = wm.getRangesBeingVisualised();
+            activeManagers.add(new SoundSpectrumViewerManager(
                     this,
                     //put the viewport into the lower right corner
                     new Point(0, height-100),
                     new Point(width, height),
-                    rangesBeingVisualised
-            );
-            activeManagers.add(ssvm);
+                    markedFrequencies
+            ));
             flagB = false;
         }
-        if(flagD && Timekeeper.getTimer().getMsElapsed() > -1){
-            if(imageDirectory!=null && !imageDirectory.equals("")){
-                imageStore = IO.loadImagesFromDisk(this, imageDirectory);
-                activeManagers.add(new BandManager(this, 0, 50, imageStore));
-            }
-            flagD = false;
+        if(flagC && Timekeeper.getTimer().getMsElapsed() > -1){
+            activeManagers.add(new BandManager(this, 0, 50, imageStore));
+            flagC = false;
         }
     }
 
@@ -201,6 +194,10 @@ public class MainApp extends PApplet{
         stroke(200,0,0);
         line(0, height/2, width, height/2);
         line(width/2, 0, width / 2, height);
+    }
+
+    public void printToScreen(String s){
+        //TODO print information, such as the current song or error to screen
     }
 
     private void checkInput(){
@@ -218,10 +215,6 @@ public class MainApp extends PApplet{
             if(key==','){
                 //sm.tryPlayNext();
             }
-        }
-
-        if(interactive && mousePressed){
-            ssvm.handleMouseInput(wm);
         }
 
         if(keyPressed && key=='p'){

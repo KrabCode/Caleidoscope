@@ -28,15 +28,15 @@ public class WaveManager extends Manager {
         //ON START
         if(initFlag)
         {
-            float spectrumSize = sa.getSpectrum().length;
-            Wave low = new Wave(p, 200, new Range(0, 10), 4);
-            Wave mid = new Wave(p, 350, new Range(11,40), 16);
-            Wave high = new Wave(p, 500, new Range(41,80), 80);
+            Wave low = new Wave(p, 200, new Range(0, 10), 2);
+            Wave mid = new Wave(p, 350, new Range(10,40), 8);
+            Wave high = new Wave(p, 500, new Range(40,80), 16);
+
             wavesManaged.add(low);
             wavesManaged.add(mid);
             wavesManaged.add(high);
-            initFlag = false;
             drawables.addAll(wavesManaged);
+            initFlag = false;
         }
 
 //          Samey concentric waves:
@@ -50,9 +50,6 @@ public class WaveManager extends Manager {
         return drawables;
     }
 
-    public void setWaveToWatchRange(int wave, Range range){
-        wavesManaged.get(wave).range = range;
-    }
 
     public List<Range> getRangesBeingVisualised(){
         List<Range> results = new ArrayList<>();
