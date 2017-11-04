@@ -32,6 +32,40 @@ public class SoundSpectrumViewer extends Drawable {
         this.beingVisualised = beingVisualised;
     }
 
+    float getRangeStartX(int rangeIndex){
+        int x = beingVisualised.get(rangeIndex).getFrom();
+        return bounds.getA().x + x;
+    }
+
+    float getRangeEndX(int rangeIndex){
+        int x = beingVisualised.get(rangeIndex).getTo();
+        return bounds.getA().x + x;
+    }
+
+    boolean isRangeStart(int spectrumIndex){
+        //isRangeStart this spectrumIndex being visualised as an interesting boundary?
+        boolean rangeStart = false;
+        for (Range range : beingVisualised){
+            if(range.getFrom() == spectrumIndex &&  spectrumIndex != 0){
+                rangeStart=true;
+                break;
+            }
+        }
+        return rangeStart;
+    }
+
+    boolean isRangeEnd(int spectrumIndex){
+        //isRangeStart this spectrumIndex being visualised as an interesting boundary?
+        boolean rangeEnd = false;
+        for (Range range : beingVisualised){
+            if(range.getTo() == spectrumIndex){
+                rangeEnd=true;
+                break;
+            }
+        }
+        return rangeEnd;
+    }
+
     @Override
     public void draw(SoundAnalysis sa) {
 
@@ -41,21 +75,7 @@ public class SoundSpectrumViewer extends Drawable {
             {
                 int spectrumIndex = (x * sa.getSpectrum().length) / getWidth();
 
-                //is this spectrumIndex being visualised as an interesting boundary?
-                boolean isPointOfInterestFrom = false;
-                boolean isPointOfInterestTo = false;
-                for (Range range : beingVisualised){
-                    if(range.getFrom() == spectrumIndex &&  spectrumIndex != 0){
-                        isPointOfInterestFrom=true;
-                        break;
-                    }
-                    if(range.getTo() == spectrumIndex){
-                        isPointOfInterestTo=true;
-                        break;
-                    }
-                }
-
-                if(isPointOfInterestFrom){
+                if(isRangeStart(spectrumIndex)){
                     //draw first special colour line
                     p.stroke(pointOfInterestColorFromR, pointOfInterestColorFromG, pointOfInterestColorFromB, 50);
                     p.strokeWeight(1);
@@ -64,8 +84,8 @@ public class SoundSpectrumViewer extends Drawable {
                             bounds.getA().y,
                             bounds.getA().x + x,
                             bounds.getD().y);
-                }else if (isPointOfInterestTo)
-                {
+
+                }else if (isRangeEnd(spectrumIndex)){
                     //draw second special colour line
                     p.stroke(pointOfInterestColorToR, pointOfInterestColorToG, pointOfInterestColorToB, 50);
                     p.strokeWeight(1);
@@ -74,12 +94,12 @@ public class SoundSpectrumViewer extends Drawable {
                             bounds.getA().y,
                             bounds.getA().x + x,
                             bounds.getD().y);
+
                 }else {
                     //draw the standard line
                     p.stroke(color, 50);
                     p.strokeWeight(1);
                 }
-
                 int barHeight = Math.min((int)(sa.getSpectrum()[spectrumIndex] * getHeight()), getHeight() - 1);
                 p.line(bounds.getA().x + x,
                         bounds.getD().y,

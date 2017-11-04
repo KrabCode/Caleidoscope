@@ -2,6 +2,7 @@ package drawable.diag;
 
 import drawable.Drawable;
 import drawable.Manager;
+import drawable.waves.WaveManager;
 import sound.Range;
 import sound.SoundAnalysis;
 import processing.core.PApplet;
@@ -36,10 +37,14 @@ public class SoundSpectrumViewerManager extends Manager {
             for(int i = 0; i < rangesBeingVisualised.size(); i++){
                 p.println( i + ":\tfrom\t"+ rangesBeingVisualised.get(i).getFrom() + "\tto\t" + rangesBeingVisualised.get(i).getTo());
             }
-
         }
         return drawables;
     }
 
+    public void handleMouseInput(WaveManager wm){
+       for(int i = 0; i < soundSpectrumViewer.beingVisualised.size(); i++)
+       {
 
+       }
+    }
 }

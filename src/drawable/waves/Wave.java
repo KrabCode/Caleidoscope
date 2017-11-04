@@ -34,8 +34,8 @@ public class Wave extends Drawable {
         strokeB = 0;
 
         strokePeakWeight = 3;
-        strokePeakR = 255;
-        strokePeakG = 255;
+        strokePeakR = 0;
+        strokePeakG = 0;
         strokePeakB = 255;
 
         spokes = 28; // must be even
