@@ -70,7 +70,7 @@ public class MainApp extends PApplet{
     private String imageDirectory = null; //"C:\\Users\\Jakub\\Desktop\\196758-alerts\\png";
 
     private boolean flagA = true;  //concentric circles
-    private boolean flagB = true;  //frequency cutting viewer
+    private boolean flagB = false;  //frequency cutting viewer
     private boolean flagC = false; //bands (requires non null imageDirectory)
 
     public static void main(String[] args)
